@@ -1,0 +1,2930 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>ELD Monitor Demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPCEtLSBFTEQgTW9uaXRvciBsb2dvc2k6IHlhc2hpbCBmb24sIHFhbGluICJFTEQiIHZhIG9zdGlkYSBrdXphdHV2IChwdWxzKSBjaGl6aWcnaSAtLT4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0iIzIyYzU1ZSIvPgogIDx0ZXh0IHg9IjMyIiB5PSIzMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkludGVyLCAnU2Vnb2UgVUknLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIKICAgICAgICBmb250LXdlaWdodD0iODAwIiBsZXR0ZXItc3BhY2luZz0iLTAuNSIgZmlsbD0iIzA2MjEwZiI+RUxEPC90ZXh0PgogIDxwYXRoIGQ9Ik04IDQ1aDEybDMuNS03IDYgMTMgNS0xMCAzIDRINTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzA2MjEwZiIgc3Ryb2tlLXdpZHRoPSI0IgogICAgICAgIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K">
+<style>
+/* ELD Monitor — qorong'i dispatch uslubi: to'q fon, to'q panellar, rangli raqamlar, yashil aksent */
+:root {
+  --bg: #0d1014; --panel: #151a21; --panel-2: #1a2029; --text: #e6e9ee; --text-2: #c9cfd8; --muted: #9ba5b3;
+  --line: #252c37; --line-2: #1e242d;
+  --side: #10141a; --side-hover: #1b212a; --side-text: #9aa3b0;
+  /* Asosiy (aksent) rang — menyu, asosiy tugmalar, tugmachalar. Holat ranglari (yashil = joyida) alohida */
+  --accent: #22c55e; --accent-2: #16a34a; --accent-soft: rgba(34, 197, 94, .18); --accent-text: #06210f;
+  --accent-hover: #2fd96b; --accent-fg: #4ade80; --accent-border: rgba(34, 197, 94, .35);
+  --red: #f87171; --red-bg: rgba(248, 113, 113, .14); --amber: #fbbf24; --amber-bg: rgba(251, 191, 36, .14);
+  --green: #4ade80; --green-bg: rgba(74, 222, 128, .13); --blue: #60a5fa; --blue-bg: rgba(96, 165, 250, .14);
+  --violet: #a78bfa; --gray-bg: rgba(148, 163, 184, .12);
+  --radius: 10px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text);
+  font: 14px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+button, input, textarea, select { font: inherit; color: inherit; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2a323d; border-radius: 6px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- tugmalar va maydonlar ---------- */
+button { cursor: pointer; border: 1px solid var(--line); background: var(--panel-2); border-radius: 7px;
+  padding: 7px 14px; font-weight: 500; color: var(--text-2); transition: background .12s, border-color .12s, color .12s; }
+button:hover { background: #222a35; border-color: #36404d; color: var(--text); }
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--accent-text); }
+button.danger { color: var(--red); }
+/* "Send" — driverga xabar yuborish: ko'k (yashil faqat "hammasi joyida" ma'nosida qoladi) */
+button.send-btn { background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; }
+button.send-btn:hover { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+button.danger:hover { border-color: rgba(248, 113, 113, .5); }
+button.small { padding: 4px 10px; font-size: 12px; }
+button:disabled { opacity: .45; cursor: default; }
+input, textarea, select { background: #0f1318; border: 1px solid var(--line); border-radius: 7px;
+  padding: 8px 10px; width: 100%; transition: border-color .12s, box-shadow .12s; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft); }
+textarea { min-height: 70px; resize: vertical; }
+label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 5px; font-weight: 500; }
+input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); }
+
+/* ---------- login / parol ---------- */
+.auth-wrap { min-height: 100vh; display: grid; place-items: center; padding: 16px;
+  background: radial-gradient(circle at 50% 0%, #15241b 0%, var(--bg) 55%); }
+.auth-card { width: 100%; max-width: 380px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; padding: 32px; box-shadow: 0 20px 60px rgba(0, 0, 0, .45); }
+.auth-card h1 { margin: 0 0 6px; font-size: 20px; }
+.auth-card p { margin: 0 0 14px; color: var(--muted); }
+.auth-card button { width: 100%; margin-top: 18px; padding: 10px; }
+.lock-icon { width: 44px; height: 44px; border-radius: 9px; display: grid; place-items: center; font-size: 20px;
+  background: var(--accent-soft); margin-bottom: 16px; }
+.err { color: var(--red); min-height: 20px; margin-top: 10px; font-size: 13px; }
+
+/* ---------- tuzilish ---------- */
+.layout { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+.content { min-width: 0; }
+
+/* ---------- chap menyu ---------- */
+.sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 6px;
+  padding: 18px 12px; background: var(--side); border-right: 1px solid var(--line-2); }
+.brand { display: flex; align-items: center; gap: 10px; padding: 2px 8px 18px; }
+.brand b { display: block; font-size: 15px; color: #fff; }
+.brand small { display: block; font-size: 11px; color: var(--muted); }
+.brand-logo { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-size: 16px;
+  background: var(--accent-soft); border: 1px solid var(--accent-border); }
+.sidebar nav { display: flex; flex-direction: column; gap: 3px; }
+.sidebar nav button { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: transparent; border: none; color: var(--side-text); padding: 9px 12px; border-radius: 7px; font-weight: 500; }
+.sidebar nav button:hover { background: var(--side-hover); color: var(--text); }
+.sidebar nav button.active { background: var(--accent-soft); color: var(--accent-fg); font-weight: 600; }
+.sidebar nav button.active::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 3px;
+  border-radius: 0 3px 3px 0; background: var(--accent); }
+/* Matn ichidagi belgilar (tugmalar, yorliqlar, sarlavhalar) — menyu bilan bir xil uslub */
+.i { width: 15px; height: 15px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px; margin-right: 5px; }
+.tag .i { width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px; }
+.icon-btn .i, .modal-x .i { margin: 0; }
+.brand-logo .i { width: 18px; height: 18px; margin: 0; color: var(--accent-fg); }
+img.brand-logo { display: block; background: none; border: none; border-radius: 8px; }
+.lock-icon .i { width: 22px; height: 22px; margin: 0; color: var(--accent-fg); }
+.empty .i { width: 16px; height: 16px; color: var(--green); }
+.banner .i { vertical-align: -3px; }
+.grp-head .i { width: 14px; height: 14px; margin-right: 2px; }
+/* Menyu belgilari — bir xil uslubdagi chiziqli SVG (emoji har kompyuterda boshqacha ko'rinardi) */
+.ico { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round; opacity: .8; }
+.sidebar nav button.active .ico { opacity: 1; }
+.sidebar .count { margin-left: auto; }
+.sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding: 14px 8px 0;
+  border-top: 1px solid var(--line-2); }
+.side-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.side-actions button { padding: 6px 8px; font-size: 12.5px; }
+.mode-pill { font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 7px; text-align: center; }
+.mode-test { background: var(--amber-bg); color: var(--amber); }
+.mode-live { background: var(--green-bg); color: var(--green); }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 18px; padding: 2px 6px 0;
+  border-radius: 10px; font-size: 11px; line-height: 1; font-variant-numeric: tabular-nums;
+  background: #ef4444; color: #fff; text-align: center; margin-left: 6px; font-weight: 600; }
+.count.hidden { display: none; }
+
+/* ---------- yuqori qator ---------- */
+.topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; padding: 14px 28px; background: rgba(13, 16, 20, .88); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line-2); }
+.topbar h1 { margin: 0; font-size: 20px; font-weight: 600; }
+.topbar .muted { font-size: 12px; margin-top: 2px; }
+.top-actions { display: flex; gap: 8px; }
+
+main { padding: 20px 28px 48px; max-width: 1500px; }
+
+/* ---------- raqamlar ---------- */
+/* Ixcham, bosiladigan raqamlar */
+.kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
+/* Status kartasi: ikonka + nom, katta raqam, qisqa izoh. Rang — kartaning ma'nosi (--k) */
+.kpi { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "num top" "num sub";
+  column-gap: 12px; row-gap: 0; align-items: center; padding: 8px 14px;
+  border-radius: var(--radius); background: linear-gradient(180deg, color-mix(in srgb, var(--k) 9%, var(--panel)) 0%, var(--panel) 70%);
+  border: 1px solid var(--line); text-align: left; cursor: pointer; overflow: hidden; min-width: 0; }
+.kpi:hover { border-color: color-mix(in srgb, var(--k) 45%, var(--line)); }
+.kpi::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 2px; background: var(--k); opacity: .85; }
+.kpi-top { grid-area: top; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.kpi-top .i { width: 14px; height: 14px; margin: 0; flex: none; color: var(--k); }
+.kpi-label { font-size: 12.5px; color: var(--text-2); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-num { grid-area: num; font-size: 24px; font-weight: 700; color: var(--k); font-variant-numeric: tabular-nums; line-height: 1;
+  min-width: 1.2ch; }
+.kpi-sub { grid-area: sub; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-height: 16px; line-height: 16px; }
+.kpi-green { --k: var(--green); } .kpi-blue { --k: var(--blue); } .kpi-red { --k: var(--red); }
+.kpi-amber { --k: var(--amber); } .kpi-violet { --k: var(--violet); }
+/* 0 — jim (diqqat talab qilmaydi) */
+.kpi-quiet { --k: #4a5462; background: var(--panel); }
+.kpi-quiet .kpi-num { color: var(--muted); }
+
+/* Yuqori qatordagi holat belgilari */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.chip { display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; padding: 5px 11px;
+  border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: var(--text-2); }
+button.chip:hover { background: var(--panel-2); }
+.chip .dot { margin-right: 6px; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
+
+/* ---------- overview: asosiy ustun + trailer ustuni ---------- */
+.ov-grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 16px; align-items: start; }
+.ov-side .panel { position: sticky; top: 84px; }
+.ov-side .trl-list { max-height: calc(100vh - 160px); overflow: auto; }
+
+/* Driver kartochkasi: bitta driver — bitta qator, barcha muammolari ichida */
+.drv-list { display: flex; flex-direction: column; }
+/* Bitta driver — bitta qator: Unit | ism | muammolar | holat | tugmalar */
+.drv-card { position: relative; display: grid; align-items: center; gap: 14px; padding: 10px 16px 10px 20px;
+  grid-template-columns: 58px minmax(150px, 230px) minmax(0, 1fr) auto; border-bottom: 1px solid var(--line-2); }
+.drv-card:last-child { border-bottom: none; }
+.drv-card:hover { background: #1a212b; }
+.drv-card::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--sv); }
+.sev-0 { --sv: var(--red); } .sev-1, .sev-2 { --sv: var(--amber); } .sev-3 { --sv: var(--blue); }
+.drv-unit { text-align: center; padding: 5px 0; border-radius: 7px; font-size: 15px; font-weight: 700;
+  font-variant-numeric: tabular-nums; background: var(--panel-2); border: 1px solid var(--line); color: #fff; }
+.drv-who { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.drv-who b { font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.drv-who .st { font-size: 11.5px; }
+.drv-state { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; }
+.drv-tags { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.drv-tags .tag { margin: 0; cursor: help; }
+.tag-dim { opacity: .5; }
+.st-bad { color: var(--red); font-weight: 600; }
+.when-soon { color: var(--amber); font-weight: 600; }
+.drv-actions { display: flex; gap: 6px; align-items: center; }
+.icon-btn { padding: 4px 7px; font-size: 13px; line-height: 1.2; background: transparent; border-color: transparent; }
+.icon-btn:hover { background: var(--panel-2); border-color: var(--line); }
+details.panel > summary { cursor: pointer; list-style: none; }
+details.panel > summary::-webkit-details-marker { display: none; }
+details.panel > summary h2::before { content: "▸"; display: inline-block; width: 16px; color: var(--muted); transition: transform .15s; }
+details.panel[open] > summary h2::before { transform: rotate(90deg); }
+details.panel:not([open]) > summary { border-bottom: none; }
+.soft-count { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--gray-bg); padding: 0 7px;
+  border-radius: 10px; margin-left: 4px; }
+
+/* Kimning navbati bo'yicha guruhlar */
+.grp + .grp { border-top: 1px solid var(--line); }
+.grp-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 20px; font-size: 12.5px;
+  font-weight: 700; letter-spacing: .02em; background: var(--panel-2); border-bottom: 1px solid var(--line-2); }
+.grp-head .muted { font-weight: 400; font-size: 12px; }
+.grp-you .grp-head { color: var(--red); background: rgba(248, 113, 113, .07); }
+.grp-bot .grp-head { color: var(--amber); }
+.grp-wait .grp-head { color: var(--blue); }
+.grp-wait .drv-card { opacity: .85; }
+.drv-note { font-size: 12.5px; color: var(--red); margin: -2px 0 6px; }
+.drv-links { display: flex; gap: 4px; margin-top: 8px; }
+button.link { background: transparent; border: 1px solid transparent; padding: 2px 8px; font-size: 12px; color: var(--muted);
+  border-radius: 6px; }
+button.link:hover { color: var(--text); background: var(--panel-2); border-color: var(--line); }
+
+/* NEW — yangi chiqqan muammo (10 daqiqa turadi) */
+.new-pill { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; padding: 1px 7px;
+  border-radius: 5px; background: #ef4444; color: #fff; margin-right: 4px; animation: newPulse 1.6s ease-in-out infinite; }
+@keyframes newPulse { 50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, .25); } }
+.drv-card.is-new, .trl-item.is-new { background: linear-gradient(90deg, rgba(239, 68, 68, .10), transparent 60%); }
+.drv-card.is-new .drv-unit { border-color: rgba(239, 68, 68, .6); }
+@media (prefers-reduced-motion: reduce) { .new-pill { animation: none; } }
+
+/* Trailer tekshiruvlari: ixcham ro'yxat */
+.trl-item { position: relative; padding: 12px 18px 12px 20px; border-bottom: 1px solid var(--line-2); display: flex;
+  flex-direction: column; gap: 4px; font-size: 13px; }
+.trl-item:last-child { border-bottom: none; }
+.trl-item::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; }
+.trl-bad::before { background: var(--red); } .trl-warn::before { background: var(--amber); } .trl-ok::before { background: var(--green); }
+.trl-ok { opacity: .8; }
+.trl-top { display: flex; align-items: center; gap: 8px; }
+.trl-top .tag { margin: 0 0 0 auto; cursor: help; }
+.trl-icons { display: flex; gap: 0; }
+.trl-icons .icon-btn { padding: 2px 5px; }
+.trl-top b { font-size: 14px; color: #fff; }
+.trl-name { color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trl-time { margin-left: auto; font-size: 12px; white-space: nowrap; }
+.trl-move { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.trl-arrow { color: var(--muted); margin: 0 2px; }
+.trl-eld { display: flex; gap: 4px 14px; flex-wrap: wrap; }
+.trl-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.trl-foot .drv-links { margin: 0; }
+.show-more { display: block; width: 100%; border: none; border-top: 1px solid var(--line); border-radius: 0;
+  background: var(--panel-2); color: var(--muted); font-size: 12.5px; padding: 9px; }
+.show-more:hover { color: var(--text); }
+#trailersOk { border-top: 1px solid var(--line-2); }
+
+.dimmed { opacity: .5; }
+
+
+/* Smena hisoboti oynasi */
+.modal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px;
+  background: rgba(5, 7, 10, .7); backdrop-filter: blur(3px); }
+.modal-card { width: min(760px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 24px 70px rgba(0, 0, 0, .6); }
+.modal-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.modal-head h2 { margin: 0; font-size: 16px; }
+.modal-x { margin-left: auto; }
+.report-text { margin: 0; padding: 16px 20px; overflow: auto; white-space: pre-wrap; word-break: break-word;
+  font: 13px/1.6 "Inter", system-ui, sans-serif; color: var(--text-2); flex: 1; }
+.modal-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 18px; border-top: 1px solid var(--line); }
+.modal-foot .spacer { flex: 1; }
+
+/* Tasdiqlash oynasi */
+.ask { z-index: 50; animation: askFade .15s ease-out; }
+.ask-card { width: min(420px, 100%); padding: 26px 26px 20px; text-align: center; animation: askPop .18s ease-out; }
+.ask-card h2 { margin: 12px 0 6px; font-size: 17px; }
+.ask-text { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+.ask-icon { width: 48px; height: 48px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent-fg); }
+.ask-icon.danger { background: var(--red-bg); color: var(--red); }
+.ask-icon .i { width: 24px; height: 24px; margin: 0; }
+.ask-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.ask-btns button { padding: 9px 12px; }
+button.danger-fill { background: #dc2626; border-color: #dc2626; color: #fff; font-weight: 600; }
+button.danger-fill:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+@keyframes askFade { from { opacity: 0; } }
+@keyframes askPop { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+@media (prefers-reduced-motion: reduce) { .ask, .ask-card { animation: none; } }
+
+/* Live rejimda "Send now" dan keyin 5 soniya bekor qilish imkoniyati */
+.undo-bar { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 31; display: flex;
+  align-items: center; gap: 14px; padding: 10px 12px 10px 18px; border-radius: 10px; background: #e6e9ee; color: #0d1014;
+  font-weight: 600; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); max-width: calc(100vw - 32px); }
+.undo-bar button { background: #0d1014; color: #fff; border-color: #0d1014; }
+.ok { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.bad { background: var(--red); box-shadow: 0 0 8px var(--red); }
+.warn { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+/* ---------- panellar va jadvallar ---------- */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 16px;
+  overflow: hidden; }
+.panel-head { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line);
+  flex-wrap: wrap; }
+.panel-head h2 { font-size: 15px; margin: 0 auto 0 0; font-weight: 600; }
+.table-wrap { overflow: auto; max-height: 72vh; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
+th, td { text-align: left; padding: 12px 20px 12px 0; border-bottom: 1px solid var(--line-2); vertical-align: middle; }
+th:first-child, td:first-child { padding-left: 20px; }
+th { position: sticky; top: 0; z-index: 1; background: var(--panel-2); font-size: 11.5px; color: var(--muted);
+  font-weight: 600; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; border-bottom: 1px solid var(--line); }
+tbody tr:hover { background: #1a212b; }
+tr:last-child td { border-bottom: none; }
+td b { font-weight: 600; color: #fff; }
+td .muted { font-size: 12px; }
+td.nowrap { white-space: nowrap; }
+td.loc { white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+
+/* Holat yorliqlari: shaffof rangli fon, yorqin matn */
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 5px;
+  margin: 1px 4px 1px 0; white-space: nowrap; }
+.t-red { background: var(--red-bg); color: var(--red); }
+.t-amber { background: var(--amber-bg); color: var(--amber); }
+.t-green { background: var(--green-bg); color: var(--green); }
+.t-blue { background: var(--blue-bg); color: var(--blue); }
+.t-gray { background: var(--gray-bg); color: var(--muted); }
+
+/* Duty status: rangli nuqta + matn */
+.st { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; color: var(--text-2); }
+.st::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #4b5563; }
+.st-DR::before { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.st-ON::before, .st-YM::before { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
+.st-SB::before { background: var(--amber); }
+.muted { color: var(--muted); }
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ---------- Drivers / Violations / History ---------- */
+.toolbar { justify-content: space-between; }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9px; background: #0f1318; border: 1px solid var(--line);
+  flex-wrap: wrap; }
+.seg button { border: none; background: transparent; padding: 5px 12px; border-radius: 6px; font-size: 13px; color: var(--muted); }
+.seg button:hover { color: var(--text); background: transparent; }
+.seg button.active { background: var(--panel-2); color: #fff; box-shadow: 0 0 0 1px var(--line); }
+.seg button span { margin-left: 4px; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.seg button span:empty { display: none; }
+tr.row-issue td:first-child { box-shadow: inset 3px 0 0 var(--red); }
+.drv-cell b { display: block; white-space: nowrap; }
+.drv-cell .muted { font-size: 12px; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-icons { display: inline-flex; white-space: nowrap; }
+.row-icons .icon-btn { padding: 2px 5px; }
+.conn { display: inline-flex; gap: 6px; }
+.cdot { width: 10px; height: 10px; border-radius: 50%; background: #3a4350; cursor: help; }
+.cdot.ok { background: var(--green); }
+.cdot.bad { background: var(--red); box-shadow: 0 0 6px var(--red); }
+td.hours { white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 13px; min-width: 64px; }
+td.hours span { display: block; line-height: 1.3; }
+td.hours i { display: block; height: 4px; width: 52px; border-radius: 2px; margin-top: 4px; background: #262d38; position: relative; overflow: hidden; }
+td.hours i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--p); border-radius: 2px; background: var(--hc); }
+.h-ok { --hc: #3f7f5a; } .h-warn { --hc: var(--amber); } .h-bad { --hc: var(--red); }
+.h-warn span { color: var(--amber); font-weight: 600; } .h-bad span { color: var(--red); font-weight: 700; }
+.viol-legend { display: flex; gap: 18px; flex-wrap: wrap; padding: 8px 20px; font-size: 12px; border-bottom: 1px solid var(--line-2); }
+.viol-legend .tag { margin-right: 3px; }
+
+.hist-list { max-height: 72vh; overflow: auto; }
+.hist-day { position: sticky; top: 0; z-index: 1; padding: 6px 20px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--muted); background: var(--panel-2); border-bottom: 1px solid var(--line); }
+.hist-row { display: grid; grid-template-columns: 48px 150px 170px minmax(0, 1fr) auto; gap: 14px; align-items: start;
+  padding: 10px 20px; border-bottom: 1px solid var(--line-2); font-size: 13px; }
+.hist-row:hover { background: #1a212b; }
+.hist-row.row-issue { box-shadow: inset 3px 0 0 var(--red); }
+.hist-time { color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.hist-to { display: flex; flex-direction: column; min-width: 0; }
+.hist-to .muted { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-text { color: var(--text-2); white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; }
+.hist-text[data-hist] { cursor: pointer; }
+.hist-text[data-hist]:not(.open)::after { content: ""; }
+.hist-text.open { display: block; -webkit-line-clamp: unset; }
+.hist-foot { padding: 10px 20px; font-size: 12px; border-top: 1px solid var(--line); }
+
+/* ---------- filtrlar ---------- */
+.filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.filters input[type=search] { width: 240px; padding-left: 32px;
+  background: #0f1318 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238590a0' stroke-width='2' stroke-linecap='round'><circle cx='7' cy='7' r='5'/><path d='M11 11l3 3'/></svg>") no-repeat 10px center; }
+.filters select { width: auto; }
+.filters label { display: flex; gap: 6px; align-items: center; margin: 0; font-size: 13px; color: var(--text-2); font-weight: 500; }
+
+/* ---------- sozlamalar ---------- */
+.hint { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.save-row { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.save-row .err { margin: 0; min-height: 0; }
+
+.set-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; align-items: start; max-width: 1080px; }
+.set-nav { position: sticky; top: 92px; display: flex; flex-direction: column; gap: 2px; }
+.set-nav button { text-align: left; background: transparent; border: none; color: var(--side-text); padding: 8px 12px;
+  border-radius: 7px; font-weight: 500; }
+.set-nav button:hover { background: var(--side-hover); color: var(--text); }
+.set-nav button.active { background: var(--accent-soft); color: var(--accent-fg); font-weight: 600; }
+.set-main { display: flex; flex-direction: column; gap: 36px; padding-bottom: 80px; }
+.set-sec { scroll-margin-top: 90px; display: flex; flex-direction: column; gap: 12px; }
+.set-title { font-size: 17px; margin: 0; font-weight: 700; }
+.set-intro { margin: -4px 0 2px; color: var(--muted); font-size: 13px; max-width: 680px; }
+.set-card { margin: 0; padding: 4px 20px; }
+.set-card > .set-sub, .set-card > .err, .set-card > .field-grid, .set-card > .save-row { margin-bottom: 14px; }
+.set-card > .field-grid { margin-top: 14px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; }
+.set-list .set-row + .set-row, .set-list .alert-row + .alert-row { border-top: 1px solid var(--line-2); }
+.set-row b, .alert-text b { font-weight: 600; color: var(--text); }
+.set-row-end { justify-content: flex-end; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-grid.three { grid-template-columns: repeat(3, 1fr); }
+.field-grid label { margin-top: 0; }
+.inline-field { display: flex; gap: 8px; }
+.inline-field select { width: auto; min-width: 80px; flex-shrink: 0; }
+.inline-field input { flex: 1; }
+.inline-field button { white-space: nowrap; }
+#tgQrImg { display: block; margin: 10px 0; background: #fff; padding: 8px; border-radius: 8px; }
+
+/* Raqam + birlik: [ 10 ] min */
+.num { display: inline-flex; align-items: center; gap: 0; flex-shrink: 0; }
+.num input, .num select { width: 74px; text-align: right; border-radius: 7px 0 0 7px; }
+.num select { width: 70px; text-align: left; }
+.num span { padding: 8px 10px; border: 1px solid var(--line); border-left: none; border-radius: 0 7px 7px 0;
+  background: var(--panel-2); color: var(--muted); font-size: 12.5px; white-space: nowrap; line-height: 1.5; }
+
+/* Yoqish/o'chirish tugmasi */
+input.switch { appearance: none; -webkit-appearance: none; width: 38px; height: 22px; border-radius: 999px; flex-shrink: 0;
+  background: #2f3743; border: 1px solid #3a4350; position: relative; cursor: pointer; transition: background .15s, border-color .15s;
+  padding: 0; margin: 0; }
+input.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+  background: #c3c9d2; transition: transform .15s, background .15s; }
+input.switch:checked { background: var(--accent); border-color: var(--accent); }
+input.switch:checked::after { transform: translateX(16px); background: #fff; }
+input.switch:focus-visible { box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* Ogohlantirish turlari ro'yxati */
+.alert-row { padding: 12px 0; }
+.alert-main { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 14px; align-items: center; }
+.alert-row.is-off .alert-text b { color: var(--muted); }
+.alert-row.is-off .timing { opacity: .45; }
+.timing { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.timing-none { font-size: 12.5px; min-width: 170px; text-align: right; }
+.timing .num input { width: 60px; }
+button.link.on { color: var(--accent-fg); background: var(--accent-soft); }
+.alert-msg { margin: 12px 0 4px 52px; display: flex; flex-direction: column; gap: 8px; }
+.msg-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; }
+.var-chip { padding: 2px 8px; font-size: 12px; border-radius: 6px; font-family: ui-monospace, Consolas, monospace;
+  color: var(--blue); background: var(--blue-bg); border-color: transparent; }
+.reset-msg { margin-left: auto; }
+.msg-preview { font-size: 12.5px; padding: 8px 12px; border-radius: 7px; background: var(--panel-2);
+  border: 1px dashed var(--line); color: var(--text-2); }
+
+/* Saqlanmagan o'zgarishlar paneli */
+.save-bar { position: fixed; bottom: 20px; left: calc(50% + 116px); transform: translateX(-50%); z-index: 20;
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px 10px 18px; border-radius: 10px;
+  background: #1f2730; border: 1px solid #36404d; box-shadow: 0 12px 34px rgba(0, 0, 0, .55); }
+.save-bar span { color: var(--amber); font-weight: 600; margin-right: 8px; white-space: nowrap; }
+
+/* ---------- xabar va bannerlar ---------- */
+.toast { position: fixed; bottom: 24px; right: 24px; background: #e6e9ee; color: #0d1014; padding: 10px 16px;
+  border-radius: 7px; opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s;
+  pointer-events: none; z-index: 30; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); font-weight: 500; }
+.toast.show { opacity: 1; transform: none; }
+.banner { padding: 10px 16px; border-radius: 7px; margin-bottom: 16px; font-size: 13px; border: 1px solid; }
+.banner.red { background: var(--red-bg); color: var(--red); border-color: rgba(248, 113, 113, .35); }
+.banner.amber { background: var(--amber-bg); color: var(--amber); border-color: rgba(251, 191, 36, .35); }
+.hidden { display: none !important; }
+
+/* ---------- planshet / telefon ---------- */
+@media (max-width: 1280px) {
+  .ov-grid { grid-template-columns: minmax(0, 1fr); }
+  .ov-side .panel { position: static; }
+  .ov-side .trl-list { max-height: none; }
+}
+@media (max-width: 1100px) {
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+  .layout { display: block; }
+  .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center;
+    gap: 8px; padding: 10px 16px; border-right: none; border-bottom: 1px solid var(--line-2); }
+  .brand { padding: 0; margin-right: auto; }
+  .brand small { display: none; }
+  .sidebar-foot { margin: 0; padding: 0; border: none; flex-direction: row; }
+  .sidebar nav { order: 3; width: 100%; flex-direction: row; overflow-x: auto; }
+  .sidebar nav button { width: auto; white-space: nowrap; }
+  .sidebar nav button.active::before { display: none; }
+  .ico { display: none; }
+  .topbar { position: static; padding: 14px 16px; }
+  .set-layout { grid-template-columns: 1fr; gap: 16px; }
+  .set-nav { position: static; flex-direction: row; overflow-x: auto; }
+  .set-nav button { white-space: nowrap; }
+  .save-bar { left: 50%; }
+}
+@media (max-width: 720px) {
+  main { padding-left: 12px; padding-right: 12px; }
+  .kpis { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .chips { margin-left: 0; }
+  .drv-card { grid-template-columns: 52px minmax(0, 1fr); gap: 8px 12px; padding: 10px 12px 10px 16px; }
+  .drv-tags { grid-column: 2; }
+  .drv-actions { grid-column: 1 / -1; }
+  .drv-actions button.small { flex: 1; }
+  .filters input[type=search] { width: 100%; }
+  .field-grid, .field-grid.three { grid-template-columns: 1fr; }
+  .set-card { padding: 2px 14px; }
+  .alert-main { grid-template-columns: auto minmax(0, 1fr); }
+  .alert-main .timing, .alert-main .timing-none, .alert-main [data-edit] { grid-column: 2; justify-self: start; }
+  .timing-none { min-width: 0; text-align: left; }
+  .alert-msg { margin-left: 0; }
+  .set-row { flex-wrap: wrap; }
+  .save-bar { width: calc(100vw - 24px); bottom: 12px; gap: 6px; padding: 8px 8px 8px 12px; }
+  .save-bar span { margin-right: auto; white-space: normal; font-size: 12.5px; line-height: 1.3; }
+  .save-bar button { padding: 7px 10px; white-space: nowrap; }
+  .toolbar .seg, .toolbar .filters { width: 100%; }
+  .hist-row { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 14px; }
+  .hist-kind { grid-column: 2; grid-row: 1; }
+  .hist-res { grid-column: 3; grid-row: 1; }
+  .hist-to { grid-column: 2 / -1; flex-direction: row; gap: 8px; }
+  .hist-text { grid-column: 1 / -1; }
+  th, td { padding: 10px 14px 10px 0; }
+  th:first-child, td:first-child { padding-left: 14px; }
+}
+
+/* 8 kunlik violation'lar: kun tugmalari (bosilsa — o'sha sanadagi log) */
+.day-chips { display: flex; flex-wrap: wrap; gap: 4px; min-width: 128px; max-width: 220px; }
+button.day-chip { padding: 2px 7px; font-size: 12px; line-height: 1.4; color: var(--text-2); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 6px; white-space: nowrap; }
+button.day-chip:hover { color: var(--text); border-color: var(--accent); }
+
+/* ELD changes */
+.chg-intro { margin: 0 16px 10px; }
+button.day-chip .i { width: 12px; height: 12px; vertical-align: -2px; margin-right: 3px; }
+
+/* Ptichkali katakcha (ELD changes → Checked) */
+.tick { display: inline-flex; margin: 0; cursor: pointer; }
+.tick input { position: absolute; opacity: 0; width: 0; height: 0; }
+.tick span { width: 22px; height: 22px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--panel-2);
+  display: inline-flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+.tick span .i { width: 15px; height: 15px; margin: 0; opacity: 0; fill: none; stroke: var(--accent-text);
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.tick:hover span { border-color: var(--accent); }
+.tick input:checked + span { background: var(--accent); border-color: var(--accent); }
+.tick input:checked + span .i { opacity: 1; }
+.tick input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Settings → Alerts group */
+.alert-chat { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.alert-chat select { min-width: 180px; max-width: 260px; }
+.bot-status { margin-top: 6px; }
+.bot-status .i { width: 13px; height: 13px; vertical-align: -2px; color: var(--accent); }
+#botToken { min-width: 220px; }
+
+/* Away: kim chiqyapti */
+.pick-list { max-height: 260px; overflow: auto; text-align: left; margin: 4px 0 14px; display: grid; gap: 6px; }
+.pick-row { display: flex; gap: 10px; align-items: center; margin: 0; padding: 8px 10px; border: 1px solid var(--line);
+  border-radius: 8px; cursor: pointer; color: var(--text); font-size: 13.5px; }
+.pick-row:hover { border-color: var(--accent); }
+.pick-row input { width: auto; margin: 0; }
+.pick-hint { font-size: 12px; margin-top: 4px; }
+
+/* Settings kartalarida bo'sh xato maydoni joy egallamasin (karta ostidagi ortiqcha bo'sh joy) */
+.set-card .err:empty { display: none; }
+
+/* Away alerts tugmasi: o'chiq — ingichka chegarali; yoqiq — to'q sariq, yonib-o'chuvchi nuqta bilan */
+.away-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 5px 12px;
+  border-radius: 999px; background: transparent; border: 1px dashed var(--muted); color: var(--text-2); }
+.away-btn .i { width: 14px; height: 14px; margin: 0; }
+.away-btn:hover { border-style: solid; border-color: #f59e0b; color: #fbbf24; }
+.away-btn.on { background: #f59e0b; border: 1px solid #f59e0b; color: #1a1205; }
+.away-btn.on:hover { background: #fbbf24; color: #1a1205; }
+.away-btn.on .i { animation: away-ring 2.4s ease-in-out infinite; transform-origin: 50% 10%; }
+.away-pulse { width: 7px; height: 7px; border-radius: 50%; background: #1a1205; animation: away-blink 1.4s ease-in-out infinite; }
+.away-btn span:last-child { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@keyframes away-blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes away-ring { 0%, 70%, 100% { transform: rotate(0); } 75% { transform: rotate(14deg); } 85% { transform: rotate(-12deg); } 95% { transform: rotate(6deg); } }
+@media (prefers-reduced-motion: reduce) { .away-btn.on .i, .away-pulse { animation: none; } }
+/* Away tugmasi sidebar pastida — LIVE mode / Restart / Quit yonida: to'liq kenglik, ular bilan bir xil burchak */
+.sidebar-foot .away-btn { justify-content: center; border-radius: 7px; padding: 7px 10px; font-size: 12.5px; }
+.sidebar-foot .away-btn span:last-child { max-width: 150px; }
+@media (max-width: 900px) { .sidebar-foot .away-btn { padding: 6px 10px; } }
+
+/* Settings → Accent color */
+.accent-pick { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+button.accent-dot { width: 26px; height: 26px; padding: 0; border-radius: 50%; background: var(--c); border: 2px solid transparent;
+  box-shadow: inset 0 0 0 2px var(--panel); cursor: pointer; }
+button.accent-dot:hover { transform: scale(1.08); }
+button.accent-dot.on { border-color: var(--text); }
+/* Telefonda (2 ustun) toq qolgan oxirgi status kartasi to'liq kenglikda — izoh qatori qisqarmasin */
+@media (max-width: 720px) { .kpis > .kpi:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+
+/* ---------- driver kartasi (o'ng panel) ---------- */
+.drv-link { cursor: pointer; }
+.drv-link:hover { color: var(--accent-fg); text-decoration: underline; text-underline-offset: 3px; }
+.drawer { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .45); display: flex; justify-content: flex-end; }
+.drawer.hidden { display: none; }
+.drawer-card { position: relative; width: min(460px, 100%); height: 100%; overflow-y: auto; background: var(--panel);
+  border-left: 1px solid var(--line); padding: 18px 18px 30px; animation: drawer-in .18s ease-out; }
+@keyframes drawer-in { from { transform: translateX(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .drawer-card { animation: none; } }
+.drawer-x { position: absolute; top: 12px; right: 12px; }
+body.drawer-open { overflow: hidden; }
+.dp-head { display: flex; gap: 14px; align-items: flex-start; padding-right: 36px; }
+.dp-unit { min-width: 64px; padding: 8px 10px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 9px;
+  background: var(--panel-2); border: 1px solid var(--line); }
+.dp-who h2 { margin: 0; font-size: 17px; line-height: 1.3; }
+.dp-state { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; font-size: 12.5px; }
+.dp-loc { display: flex; gap: 6px; align-items: center; margin-top: 4px; font-size: 12.5px; }
+.dp-loc .i { width: 13px; height: 13px; margin: 0; flex: none; }
+.dp-links { margin: 12px 0 4px; }
+.dp-sec { border-top: 1px solid var(--line-2); padding: 12px 0 4px; }
+.dp-sec h3 { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.dp-none { font-size: 12.5px; }
+.dp-row { display: flex; gap: 8px; align-items: center; font-size: 13px; padding: 3px 0; min-width: 0; }
+.dp-row .tag { flex: none; margin: 0; }
+.dp-when { margin-left: auto; flex: none; font-size: 12px; color: var(--muted); }
+.dp-hist .dp-when { margin-left: 0; width: 42px; }
+.dp-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; color: var(--text-2); }
+.dp-trl { font-size: 13px; display: grid; gap: 4px; }
+.dp-hours { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.dp-hr { display: grid; gap: 3px; padding: 8px 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line-2); }
+.dp-hr span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.dp-hr b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.dp-hr i { display: block; height: 4px; border-radius: 3px; background: var(--line); position: relative; overflow: hidden; }
+.dp-hr i::after { content: ""; position: absolute; inset: 0; width: var(--p, 0%); background: var(--green); border-radius: 3px; }
+.dp-hr.h-warn i::after { background: var(--amber); } .dp-hr.h-bad i::after { background: var(--red); }
+.dp-hr.h-warn b { color: var(--amber); } .dp-hr.h-bad b { color: var(--red); }
+@media (max-width: 480px) { .dp-hours { grid-template-columns: repeat(2, 1fr); } }
+
+/* Settings: bo'lim ichidagi kichik sarlavha (Dashboard → Password) */
+.set-sub-title { margin: 18px 0 8px; font-size: 13px; font-weight: 700; color: var(--text-2); }
+/* Off / Test / Live tanlagichlari ixcham */
+#autoFill, #autoSleeper { width: auto; min-width: 110px; flex: none; }
+.row-ctl { display: flex; align-items: center; gap: 10px; flex: none; }
+
+
+.demo-pill{position:fixed;z-index:60;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  background:#1b2230;color:#e6e9ee;border:1px solid #f59e0b;border-radius:999px;padding:6px 14px;font:600 12px Inter,system-ui,sans-serif;
+  box-shadow:0 4px 18px rgba(0,0,0,.35);pointer-events:none}
+.demo-pill b{color:#f59e0b}
+
+</style>
+<script>document.body ? document.body.classList.add("layout") : document.addEventListener("DOMContentLoaded", () => document.body.classList.add("layout"));</script>
+<div class="demo-pill"><b>DEMO</b> · made-up drivers, nothing is sent</div>
+
+  <!-- ===== CHAP MENYU ===== -->
+  <aside class="sidebar">
+    <div class="brand"><img class="brand-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPCEtLSBFTEQgTW9uaXRvciBsb2dvc2k6IHlhc2hpbCBmb24sIHFhbGluICJFTEQiIHZhIG9zdGlkYSBrdXphdHV2IChwdWxzKSBjaGl6aWcnaSAtLT4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0iIzIyYzU1ZSIvPgogIDx0ZXh0IHg9IjMyIiB5PSIzMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkludGVyLCAnU2Vnb2UgVUknLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIKICAgICAgICBmb250LXdlaWdodD0iODAwIiBsZXR0ZXItc3BhY2luZz0iLTAuNSIgZmlsbD0iIzA2MjEwZiI+RUxEPC90ZXh0PgogIDxwYXRoIGQ9Ik04IDQ1aDEybDMuNS03IDYgMTMgNS0xMCAzIDRINTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzA2MjEwZiIgc3Ryb2tlLXdpZHRoPSI0IgogICAgICAgIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K" alt="" width="32" height="32"><div><b>ELD Monitor</b><small>FiveELD · Telegram</small></div></div>
+    <nav id="tabs">
+      <button data-tab="overview" class="active"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview <span id="cIssues" class="count hidden"></span></button>
+      <button data-tab="drivers"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2 .7 3.2 2.4 3.5 5.2"/></svg>Drivers</button>
+      <button data-tab="violations"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19L12 3.5z"/><path d="M12 10v4.5M12 17.2v.3"/></svg>Violations <span id="cViol" class="count hidden"></span></button>
+      <button data-tab="changes"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>ELD changes <span id="cChanges" class="count hidden"></span></button>
+      <button data-tab="history"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/><path d="M8 9.5h8M8 12.5h5"/></svg>Message history</button>
+      <button data-tab="settings"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Settings</button>
+    </nav>
+    <div class="sidebar-foot">
+      <button class="away-btn" id="btnAway"></button>
+      <span id="modePill" class="mode-pill"></span>
+      <button id="btnLock" title="Lock the dashboard"><i data-ic="lock"></i>Lock</button>
+      <div class="side-actions">
+        <button id="btnRestart" title="Restart the program (about 20–40 seconds)"><i data-ic="refresh"></i>Restart</button>
+        <button class="danger" id="btnQuit" title="Stop the program"><i data-ic="stop"></i>Quit</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Driver kartasi: ism bosilganda o'ngdan chiqadi -->
+  <div id="drvDrawer" class="drawer hidden">
+    <div class="drawer-card" role="dialog" aria-label="Driver card">
+      <button class="icon-btn drawer-x" data-drv-close title="Close (Esc)"><i data-ic="close"></i></button>
+      <div id="drvDrawerBody"></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- ===== YUQORI QATOR ===== -->
+    <header class="topbar">
+      <div><h1 id="pageTitle">Overview</h1><div class="muted" id="topSub"></div></div>
+      <div class="chips">
+        <span class="chip" id="chipMon"></span>
+        <button class="chip" id="btnShowEld" title="Bring the FiveELD browser window to front"></button>
+        <button class="chip" id="chipTg" title="Telegram settings"></button>
+        <button class="chip" id="btnMode" title="Switch test / live mode"></button>
+      </div>
+      <div class="top-actions">
+        <button id="btnReport" title="Summary of this shift"><i data-ic="clipboard"></i>Shift report</button>
+        <button id="btnCheck"><i data-ic="refresh"></i>Check now</button>
+        <button id="btnPause"></button>
+      </div>
+    </header>
+
+  <main>
+    <div id="banner"></div>
+
+    <!-- ===== OVERVIEW ===== -->
+    <section data-page="overview">
+      <div class="kpis">
+        <button class="kpi kpi-green" data-go="drivers" title="Open drivers">
+          <span class="kpi-top"><i data-ic="truck"></i><span class="kpi-label">Driving</span></span>
+          <span class="kpi-num" id="kDR">–</span><span class="kpi-sub" id="kDRsub"></span></button>
+        <button class="kpi kpi-blue" data-go="drivers" title="Open drivers">
+          <span class="kpi-top"><i data-ic="clock"></i><span class="kpi-label">On duty</span></span>
+          <span class="kpi-num" id="kON">–</span><span class="kpi-sub" id="kONsub"></span></button>
+        <button class="kpi kpi-red" data-go="actionPanel" title="Go to action needed">
+          <span class="kpi-top"><i data-ic="alert"></i><span class="kpi-label">Needs you</span></span>
+          <span class="kpi-num" id="kIssues">–</span><span class="kpi-sub" id="kIssuesSub"></span></button>
+        <button class="kpi kpi-amber" data-go="trailerPanel" title="Go to trailer checks">
+          <span class="kpi-top"><i data-ic="trailer"></i><span class="kpi-label">Trailer checks</span></span>
+          <span class="kpi-num" id="kTrl">–</span><span class="kpi-sub" id="kTrlSub"></span></button>
+        <button class="kpi kpi-violet" data-go="violations" title="Open violations">
+          <span class="kpi-top"><i data-ic="file"></i><span class="kpi-label">Violations</span></span>
+          <span class="kpi-num" id="kViol">–</span><span class="kpi-sub" id="kViolSub"></span></button>
+      </div>
+
+      <div class="ov-grid">
+        <div class="ov-main">
+          <div class="panel" id="actionPanel">
+            <div class="panel-head"><h2>Action needed</h2><span class="muted" id="actionSummary"></span></div>
+            <div id="actionList">
+              <div class="grp grp-you" id="grpYou"><div class="grp-head"><i data-ic="alert"></i>Needs you <span class="soft-count" id="nYou"></span></div>
+                <div class="drv-list" id="listYou"></div></div>
+              <div class="grp grp-bot" id="grpBot"><div class="grp-head" title="Nothing to do — the message goes out by itself"><i data-ic="clock"></i>Bot will send <span class="soft-count" id="nBot"></span></div>
+                <div class="drv-list" id="listBot"></div></div>
+              <div class="grp grp-wait" id="grpWait"><div class="grp-head" title="The bot reminds again by itself"><i data-ic="chat"></i>Waiting for driver <span class="soft-count" id="nWait"></span></div>
+                <div class="drv-list" id="listWait"></div></div>
+              <div class="empty hidden" id="actionEmpty"><i data-ic="check"></i><span id="actionEmptyText">All good — nobody needs a message right now</span></div>
+            </div>
+          </div>
+          <details class="panel" id="infoPanel">
+            <summary class="panel-head" title="Telegram alert is turned off for these (Settings → Alerts) — dashboard only, use Send to message the driver"><h2>Alerts off · not sent <span class="soft-count" id="infoCount"></span></h2></summary>
+            <div class="drv-list" id="infoList"></div>
+          </details>
+        </div>
+        <div class="ov-side">
+          <div class="panel" id="trailerPanel">
+            <div class="panel-head"><h2>Trailer checks</h2><span class="muted" id="trailerWindow"></span></div>
+            <div class="trl-list" id="trailersList"></div>
+            <button class="show-more hidden" id="btnTrlOk"></button>
+            <div class="trl-list hidden" id="trailersOk"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DRIVERS ===== -->
+    <section data-page="drivers" class="hidden">
+      <div class="panel">
+        <div class="panel-head toolbar">
+          <div class="seg" id="drvSeg">
+            <button data-dfilter="duty" class="active">On duty <span></span></button>
+            <button data-dfilter="problems">With issues <span></span></button>
+            <button data-dfilter="nogroup">No group <span></span></button>
+            <button data-dfilter="all">All <span></span></button>
+          </div>
+          <div class="filters">
+            <input type="search" id="drvSearch" placeholder="Search name or unit…">
+            <select id="drvCompany"><option value="">All companies</option></select>
+          </div>
+        </div>
+        <div class="table-wrap"><table class="drv-table">
+          <thead><tr><th>Unit</th><th>Driver</th><th>Status</th><th title="Internet · ELD">Conn.</th>
+            <th>Break</th><th>Drive</th><th>Shift</th><th>Cycle</th><th>Issues</th><th></th></tr></thead>
+          <tbody id="driversBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===== VIOLATIONS ===== -->
+    <section data-page="violations" class="hidden">
+      <div class="panel">
+        <div class="panel-head toolbar">
+          <div class="seg" id="violSeg">
+            <button data-vfilter="red" class="active"><span class="dot bad"></span>Important <span></span></button>
+            <button data-vfilter="all">All <span></span></button>
+            <button data-vfilter="days8" title="Red violations / errors in the last 8 days (refreshed hourly)">Last 8 days <span></span></button>
+          </div>
+          <div class="filters"><input type="search" id="violSearch" placeholder="Search name or unit…"></div>
+        </div>
+        <div class="viol-legend muted">
+          <span><span class="tag t-red">Violation</span><span class="tag t-red">Error</span> red = must be fixed</span>
+          <span><span class="tag t-amber">Warning</span><span class="tag t-gray">Error</span> = can be ignored</span>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Unit</th><th>Driver</th><th>Status</th><th>Problems</th><th id="violWhenTh">Started</th><th></th></tr></thead>
+          <tbody id="violBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===== ELD CHANGES: dastur FiveELD da nimani o'zgartirgani ===== -->
+    <section data-page="changes" class="hidden">
+      <div class="panel">
+        <div class="panel-head toolbar">
+          <div class="seg" id="chgSeg">
+            <button data-cfilter="todo" class="active">To check <span></span></button>
+            <button data-cfilter="live">All changes <span></span></button>
+            <button data-cfilter="test">Test (not saved) <span></span></button>
+          </div>
+          <div class="filters"><input type="search" id="chgSearch" placeholder="Search name or unit…"></div>
+        </div>
+        <p class="set-intro chg-intro">Everything the app changed in FiveELD. Open the log, look it over, then tick <b>Checked</b>.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>When</th><th>Unit</th><th>Driver</th><th>Change</th><th>Where</th><th>Checked</th><th></th></tr></thead>
+          <tbody id="chgBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===== HISTORY ===== -->
+    <section data-page="history" class="hidden">
+      <div class="panel">
+        <div class="panel-head toolbar">
+          <div class="seg" id="histSeg">
+            <button data-hfilter="all" class="active">All <span></span></button>
+            <button data-hfilter="driver">To drivers <span></span></button>
+            <button data-hfilter="me">Alerts to me <span></span></button>
+            <button data-hfilter="group">Group messages <span></span></button>
+            <button data-hfilter="resolved">Resolved <span></span></button>
+            <button data-hfilter="failed">Failed <span></span></button>
+          </div>
+          <div class="filters"><input type="search" id="histSearch" placeholder="Search unit or text…"></div>
+        </div>
+        <div class="hist-list" id="histBody"></div>
+        <div class="muted hist-foot">Last 400 records</div>
+      </div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section data-page="settings" class="hidden">
+      <div class="set-layout">
+        <nav class="set-nav" id="setNav">
+          <button data-sec="secConn" class="active"><i data-ic="plug"></i>Connections</button>
+          <button data-sec="secAlerts"><i data-ic="bell"></i>Alerts</button>
+          <button data-sec="secAuto"><i data-ic="flask"></i>Automation</button>
+          <button data-sec="secAway"><i data-ic="phone"></i>Away alerts</button>
+          <button data-sec="secChecks"><i data-ic="clock"></i>Checks</button>
+          <button data-sec="secDash"><i data-ic="monitor"></i>Dashboard</button>
+        </nav>
+
+        <div class="set-main">
+          <!-- ===== ULANISHLAR ===== -->
+          <div class="set-sec" id="secConn">
+            <h2 class="set-title">Connections</h2>
+            <div class="panel set-card">
+              <div class="set-row">
+                <div><b>FiveELD</b><div class="hint" id="eldAccount"></div></div>
+                <span class="chip" id="eldBadge"></span>
+              </div>
+              <div class="save-row set-sub">
+                <button id="btnEldShow">Show browser window</button>
+                <button id="btnEldSwitch" title="Log out and log in with another FiveELD account"><i data-ic="swap"></i>Switch account…</button>
+              </div>
+            </div>
+            <div class="panel set-card" id="tgPanel">
+              <div class="set-row">
+                <div><b>Telegram</b><div class="hint" id="tgPanelState"></div></div>
+                <span class="chip" id="tgBadge"></span>
+              </div>
+              <div id="tgKeys" class="set-sub">
+                <div class="field-grid">
+                  <div><label>api_id</label><input id="tgApiId" inputmode="numeric" autocomplete="off"></div>
+                  <div><label>api_hash</label><input id="tgApiHash" type="password" autocomplete="off"></div>
+                </div>
+                <div class="hint">Get these at my.telegram.org → API development tools.</div>
+                <div class="save-row"><button class="primary" id="btnTgKeys">Save and connect</button></div>
+              </div>
+              <div id="tgPhone" class="hidden set-sub">
+                <div class="save-row"><button class="primary" id="btnTgQr"><i data-ic="phone"></i>Log in with QR code (recommended)</button></div>
+                <div class="hint">No code needed — scan with the Telegram app on your phone.</div>
+                <label>…or phone number (+998...)</label>
+                <div class="inline-field"><input id="tgPhoneIn" autocomplete="off"><button id="btnTgPhone">Send code</button></div>
+              </div>
+              <div id="tgQr" class="hidden set-sub">
+                <img id="tgQrImg" alt="Telegram login QR code" width="220" height="220">
+                <div class="hint">On your phone: <b>Telegram → Settings → Devices → Link Desktop Device</b>, then scan this code.
+                  The code refreshes by itself every ~30 seconds.</div>
+                <div class="save-row"><button data-tg-back>← Back</button></div>
+              </div>
+              <div id="tgCode" class="hidden set-sub">
+                <div class="hint" id="tgCodeHint"></div>
+                <label>Login code</label>
+                <div class="inline-field"><input id="tgCodeIn" inputmode="numeric" autocomplete="off"><button class="primary" id="btnTgCode">Confirm</button></div>
+                <div class="save-row"><button data-tg-back>← Change number</button></div>
+              </div>
+              <div id="tgPass" class="hidden set-sub">
+                <label>Telegram 2FA (cloud) password</label>
+                <div class="inline-field"><input id="tgPassIn" type="password" autocomplete="off"><button class="primary" id="btnTgPass">Sign in</button></div>
+                <div class="save-row"><button data-tg-back>← Change number</button></div>
+              </div>
+              <div id="tgReady" class="hidden set-sub">
+                <div class="save-row"><button id="btnTgRefresh"><i data-ic="refresh"></i>Refresh groups</button>
+                  <button id="btnTgSwitch" title="Log out and connect another Telegram account"><i data-ic="swap"></i>Switch account…</button></div>
+              </div>
+              <div class="err" id="tgErr"></div>
+            </div>
+
+          </div>
+
+          <!-- ===== OGOHLANTIRISHLAR VA XABARLAR ===== -->
+          <div class="set-sec" id="secAlerts">
+            <h2 class="set-title">Alerts</h2>
+            <div class="panel set-card">
+              <div class="set-row">
+                <div><b>Sending mode</b>
+                  <div class="hint" id="modeHint"></div></div>
+                <button id="btnMode2"></button>
+              </div>
+            </div>
+            <p class="set-intro">Which alerts go to the driver's group, when, and the text. Off = dashboard only.</p>
+            <div class="panel set-card set-list" id="alertList"></div>
+            <div class="panel set-card">
+              <div class="set-row">
+                <div><b>Red violations / errors</b>
+                  <div class="hint">Send a note to my own Saved Messages (not to the driver)</div></div>
+                <input type="checkbox" class="switch" id="notifyViol">
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== AVTOMATIK AMALLAR (FiveELD da o'zgartiradi) ===== -->
+          <div class="set-sec" id="secAuto">
+            <h2 class="set-title">Automation</h2>
+            <p class="set-intro">Changes the app makes in FiveELD by itself. Test = only shows what it would do (ELD changes → Test).</p>
+            <div class="panel set-card set-list">
+              <div class="set-row">
+                <div><b>Auto Sleeper at truck stops</b>
+                  <div class="hint">Stuck in ON duty at a truck stop → SB from now</div></div>
+                <select id="autoSleeper"><option value="off">Off</option><option value="test">Test</option><option value="live">Live</option></select>
+              </div>
+              <div class="set-row">
+                <div><b>Auto fill trailer / BOL</b>
+                  <div class="hint">If the driver doesn't update it in time</div></div>
+                <select id="autoFill"><option value="off">Off</option><option value="test">Test</option><option value="live">Live</option></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== AWAY ALERTS (bot) ===== -->
+          <div class="set-sec" id="secAway">
+            <h2 class="set-title">Away alerts</h2>
+            <p class="set-intro">Turn on with the Away alerts button in the sidebar when you leave.</p>
+            <div class="panel set-card">
+              <div class="set-row">
+                <div><b>Away alerts bot</b>
+                  <div class="hint bot-status" id="botStatus"></div></div>
+                <div class="alert-chat" id="botControls">
+                  <input type="password" id="botToken" placeholder="Bot token from @BotFather" autocomplete="off">
+                  <button id="btnBotSave">Save</button>
+                  <button id="btnBotConnect" class="hidden" title="Someone just pressed Start in the bot">Refresh people</button>
+                  <button id="btnAlertTest" class="hidden" title="Send a test alert to the chosen person">Send test</button>
+                  <button id="btnCallTest" class="hidden" title="ELD DEPARTMENT calls the chosen person (rings ~20 s)">Test call</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ===== TEKSHIRUV VA ESLATMALAR ===== -->
+          <div class="set-sec" id="secChecks">
+            <h2 class="set-title">Checks</h2>
+            <div class="panel set-card set-list">
+              <div class="set-row">
+                <div><b>Companies to check</b><div class="hint">Turned-off companies are not opened at all — checks get faster</div></div>
+                <button class="small" id="btnCompRefresh" title="Read the company list from FiveELD again"><i data-ic="refresh"></i>Refresh list</button>
+              </div>
+              <div id="companyList"></div>
+            </div>
+            <div class="panel set-card set-list">
+              <div class="set-row">
+                <div><b>Check FiveELD every</b><div class="hint">How often all drivers are checked</div></div>
+                <div class="num"><input type="number" min="1" data-cfg="check_every_minutes"><span>min</span></div>
+              </div>
+              <div class="set-row">
+                <div><b>Remind again after</b><div class="hint">If the driver has not fixed it yet</div></div>
+                <div class="num"><input type="number" min="1" data-cfg="remind_again_after_minutes"><span>min</span></div>
+              </div>
+              <div class="set-row">
+                <div><b>Notify me after</b><div class="hint">Then it goes to "Needs you" (and to your phone while Away)</div></div>
+                <div class="num"><input type="number" min="1" data-cfg="max_reminders_before_escalation"><span>reminders</span></div>
+              </div>
+              <div class="set-row">
+                <div><b>Trailer messages window</b><div class="hint" id="rescanHint"></div></div>
+                <div class="num"><select data-cfg="trailer_window_hours"><option>4</option><option>8</option><option>12</option><option>16</option><option>24</option></select><span>hours</span></div>
+              </div>
+              <div class="set-row set-row-end"><button id="btnRescan"><i data-ic="refresh"></i>Re-read groups now</button></div>
+              <div class="set-row">
+                <div><b>Export group messages for review</b>
+                  <div class="hint">Saves all Unit# group messages with how the program understood them to
+                    <code>data\export\</code> on this computer — to find and fix misunderstandings</div>
+                  <div class="hint" id="exportHint"></div></div>
+                <div class="inline-field">
+                  <select id="exportHours"><option value="24">24 h</option><option value="48" selected>48 h</option><option value="72">72 h</option></select>
+                  <button id="btnExport"><i data-ic="download"></i>Export</button></div>
+              </div>
+            </div>
+            <div class="hint">Internet, ELD and BOL / trailer are checked only in DR / ON / YM status.</div>
+          </div>
+
+          <!-- ===== DASHBOARD ===== -->
+          <div class="set-sec" id="secDash">
+            <h2 class="set-title">Dashboard</h2>
+            <div class="panel set-card set-list">
+              <div class="set-row">
+                <div><b>Windows notification</b><div class="hint" id="notifyHint">For new issues that go to Telegram</div></div>
+                <input type="checkbox" class="switch" id="optNotify">
+              </div>
+              <div class="set-row">
+                <div><b>Sound</b><div class="hint">Short beep for new issues</div></div>
+                <div class="row-ctl"><button class="small" id="btnTestAlert"><i data-ic="bell"></i>Test</button>
+                  <input type="checkbox" class="switch" id="optSound"></div>
+              </div>
+              <div class="set-row">
+                <div><b>"Undo" before Send now</b><div class="hint">5 seconds to cancel, in live mode</div></div>
+                <input type="checkbox" class="switch" id="optUndo">
+              </div>
+              <div class="set-row">
+                <div><b>Accent color</b><div class="hint">Menu, main buttons and switches</div></div>
+                <div class="accent-pick" id="accentPick" role="radiogroup" aria-label="Accent color"></div>
+              </div>
+            </div>
+            <div class="hint">These are saved in this browser only and apply right away.</div>
+            <h3 class="set-sub-title">Password</h3>
+            <div class="panel set-card">
+              <div class="set-row">
+                <div><b>Lock the dashboard with a password</b>
+                  <div class="hint">Off = opens without a password. The dashboard works only on this computer either way.</div></div>
+                <input type="checkbox" class="switch" id="optLock">
+              </div>
+              <div class="set-row" id="autoLockRow">
+                <div><b>Auto-lock</b><div class="hint">Lock after no activity (0 = never)</div></div>
+                <div class="num"><input type="number" min="0" data-cfg="auto_lock_minutes"><span>min</span></div>
+              </div>
+              <div class="set-sub hidden" id="lockConfirm">
+                <label for="lockPw">Enter your current password to turn the lock off</label>
+                <div class="inline-field"><input type="password" id="lockPw" autocomplete="off">
+                  <button class="primary" id="btnLockOff">Turn off</button><button id="btnLockCancel">Cancel</button></div>
+                <div class="err" id="lockErr"></div>
+              </div>
+            </div>
+            <div class="panel set-card" id="pwCard">
+              <div class="field-grid three">
+                <div><label>Current password</label><input type="password" id="pwOld" autocomplete="off"></div>
+                <div><label>New password</label><input type="password" id="pwNew" autocomplete="off"></div>
+                <div><label>Repeat new password</label><input type="password" id="pwNew2" autocomplete="off"></div>
+              </div>
+              <div class="save-row"><button class="primary" id="btnPw">Change password</button><span class="err" id="pwErr"></span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="save-bar hidden" id="saveBar">
+        <span>● You have unsaved changes</span>
+        <button id="btnDiscard">Discard</button>
+        <button class="primary" id="btnSaveAll">Save changes</button>
+      </div>
+    </section>
+  </main>
+  </div>
+
+  <!-- ===== SMENA HISOBOTI ===== -->
+  <div class="modal hidden" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+    <div class="modal-card">
+      <div class="modal-head"><h2 id="reportTitle"><i data-ic="clipboard"></i>Shift report</h2>
+        <span class="muted" id="reportSince"></span>
+        <button class="icon-btn modal-x" id="btnReportClose" title="Close"><i data-ic="close"></i></button></div>
+      <pre class="report-text" id="reportText">Loading…</pre>
+      <div class="modal-foot">
+        <button id="btnNewShift" title="Start counting a new shift from now"><i data-ic="undo"></i>New shift</button>
+        <span class="spacer"></span>
+        <button id="btnReportCopy"><i data-ic="file"></i>Copy</button>
+        <button class="primary" id="btnReportSend">Send to my Saved Messages</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="undo-bar hidden" id="undoBar"><span id="undoText"></span><button class="small" id="btnUndo">Undo</button></div>
+  
+<script>
+// ELD Monitor demo: fake data and an in-page API. Nothing leaves the browser.
+(() => {
+  const T0 = Date.now() / 1000;
+  const now = () => Date.now() / 1000;
+  const M = 60, H = 3600;
+  const CO = { "Ridgeline Freight": "demo-rf", "Blue Mesa Logistics": "demo-bm" };
+  const coId = (c) => CO[c];
+  const fmtClock = (ts) => new Date(ts * 1000).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const fmtDay = (ts) => new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  // unit, first, last, company, status, location, break/drive/shift/cycle minutes left
+  const RAW = [
+    ["214", "Marcus", "Reed", 0, "DR", "4.2 mi E of Effingham, IL", 210, 340, 410, 2510],
+    ["118", "Daniel", "Okafor", 0, "SB", "Pilot Travel Center, Dalton, GA", 480, 0, 0, 1890],
+    ["305", "Luis", "Herrera", 0, "ON", "Love's #412, Amarillo, TX", 480, 420, 610, 3120],
+    ["092", "Peter", "Novak", 0, "DR", "2.8 mi S of Joplin, MO", 24, 190, 260, 1450],
+    ["471", "Samuel", "Asante", 0, "OFF", "1.1 mi W of Knoxville, TN", 480, 660, 840, 3900],
+    ["233", "Kevin", "Brooks", 0, "SB", "TA Truck Stop, Ontario, CA", 480, 120, 180, 980],
+    ["056", "Andre", "Mbeki", 0, "DR", "6.5 mi N of Gary, IN", 330, 22, 95, 1210],
+    ["127", "Jonah", "Whitfield", 0, "SB", "Flying J, Lake City, FL", 480, 300, 420, 2200],
+    ["388", "Omar", "Haddad", 0, "OFF", "3.0 mi SE of Laredo, TX", 480, 660, 840, 4100],
+    ["149", "Victor", "Lindqvist", 0, "DR", "12 mi W of Salina, KS", 160, 280, 350, 2650],
+    ["520", "Eric", "Mwangi", 0, "SB", "Petro, Columbia, SC", 480, 410, 500, 3300],
+    ["077", "Tyler", "Grant", 0, "ON", "Distribution center, Savannah, GA", 480, 500, 620, 2800],
+    ["264", "Felix", "Duarte", 0, "SB", "Love's #233, Tucumcari, NM", 480, 610, 700, 3600],
+    ["311", "Hassan", "Idris", 0, "DR", "0.9 mi N of Nashville, TN", 400, 455, 520, 2950],
+    ["185", "Calvin", "Moore", 0, "OFF", "Home terminal, Atlanta, GA", 480, 660, 840, 4200],
+    ["402", "Ivan", "Petrov", 0, "SB", "Pilot, Little Rock, AR", 480, 0, 0, 1320],
+    ["609", "Noah", "Bennett", 1, "DR", "5.4 mi E of Tucson, AZ", 300, 380, 470, 2400],
+    ["611", "Isaac", "Mensah", 1, "SB", "TA, Barstow, CA", 480, 520, 640, 3450],
+    ["614", "Raul", "Castillo", 1, "DR", "8.1 mi S of El Paso, TX", 95, 260, 310, 1780],
+    ["617", "Grant", "Fuller", 1, "OFF", "2.2 mi N of Denver, CO", 480, 660, 840, 3990],
+    ["620", "Simon", "Achebe", 1, "SB", "Love's, Gallup, NM", 480, 440, 560, 2600],
+    ["623", "Marco", "Bianchi", 1, "DR", "3.6 mi W of Oklahoma City, OK", 260, 300, 380, 2050],
+    ["626", "Joel", "Paterson", 1, "SB", "Flying J, Ogden, UT", 480, 590, 700, 3720],
+    ["629", "Paul", "Kariuki", 1, "OFF", "1.4 mi E of Fresno, CA", 480, 660, 840, 4050],
+  ];
+  const COMP = Object.keys(CO);
+  const drivers = RAW.map((r, i) => ({
+    company: COMP[r[3]], company_id: coId(COMP[r[3]]), name: `${r[1]} ${r[2]}`, status: r[4],
+    truck: r[0], driver_id: String(9100 + i), location: r[5], last_seen: "a few seconds ago", minutes_ago: 0,
+    problems: [], left: { break: r[6], drive: r[7], shift: r[8], cycle: r[9] }, online: true, eld: true,
+    group: `Unit# ${r[0]} ${r[1]} ${r[2]}`,
+  }));
+  const D = (u) => drivers.find((d) => d.truck === u);
+  const offline = D("402"); offline.online = false; offline.last_seen = "24 minutes ago"; offline.minutes_ago = 24;
+  const unplugged = D("614"); unplugged.eld = false;
+
+  const issues = [];
+  const issue = (u, type, detail, text, since, extra = {}) => {
+    const d = D(u);
+    d.problems.push(type);
+    issues.push({ key: `${d.company_id}|${d.driver_id}|${type}`, type, company: d.company, unit: u, name: d.name,
+      status: d.status, detail, text, first: T0 - since + 60, last: 0, count: 0, escalated: false, ignored_until: 0,
+      once: false, seen: T0, since: T0 - since, muted: false, away_sent: false, ...extra });
+  };
+  issue("402", "offline", "Last seen 24 min ago · phone has no internet",
+    "Hello Ivan, your phone is offline (no internet). Please turn on your internet. Thank you!", 24 * M);
+  issue("614", "disconnect", "ELD device disconnected for 11 min while driving",
+    "Hello Raul, your ELD device is disconnected. Please reconnect the ELD. Thank you!", 11 * M,
+    { last: T0 - 6 * M, count: 1 });
+  issue("305", "long_on", "ON since " + fmtClock(T0 - 72 * M) + " at Love's #412 · Auto Sleeper waits for 60 min",
+    "Hello Luis, you have been On Duty for 1h 12m. If you are not working, please change your status to Sleeper. Thank you!", 72 * M);
+  issue("214", "trailer_change", "ELD: trailer RF 50211 → RF 50388 · auto fill: would fill Trailer → RF 50388 · Document → 7732105 (3 events)",
+    "Hello Marcus, your trailer RF 50388 was loaded. Please update in the ELD app — Trailer: RF 50388 (now: RF 50211); Shipping Document: 7732105. Thank you!", 38 * M);
+  issue("623", "shipping_doc", "Driving with a loaded trailer, Shipping Document is empty",
+    "Hello Marco, please add your Shipping Document (BOL #) in the ELD app. Thank you!", 52 * M);
+  issue("092", "low_break", "24 min left until the 30-minute break",
+    "Hello Peter, you have 24 min left until your 30-minute break. Please plan your break. Thank you!", 6 * M, { muted: true });
+  issue("056", "low_drive", "22 min of driving time left",
+    "Hello Andre, you have 22 min of driving time left. Please plan to stop. Thank you!", 8 * M, { muted: true });
+
+  const tc = (u, inT, outT, kind, bol, status, mins, eldT, eldDoc, extra = {}) => {
+    const d = D(u);
+    const lines = [`${kind === "loaded" ? "Empty" : "Loaded"} in# ${inT}`, `${kind === "loaded" ? "Loaded" : "Empty"} out# ${outT}`];
+    if (bol) lines.push(`BOL# ${bol}`);
+    return { unit: u, gkey: "g" + d.driver_id, group: d.group, in: [inT], out: [outT], out_kind: kind, has_out: true, pod: "",
+      bol_no: bol, live: false, msg_ts: T0 - mins * M, start_ts: T0 - mins * M, msg_id: 1000 + Number(d.driver_id), lines,
+      edited: false, status, eld: eldT ? [eldT] : null, eld_docs: eldDoc ? [eldDoc] : null,
+      trailer_ok: status === "ok" ? true : status === "mismatch" ? false : null,
+      doc_ok: status === "ok" ? true : status === "mismatch" ? !!bol : null,
+      checked: status === "waiting" ? 0 : T0 - 2 * M, name: d.name, company: d.company, ...extra };
+  };
+  const trailer_checks = [
+    tc("214", "RF 50211", "RF 50388", "loaded", "7732105", "mismatch", 38, "RF 50211", "N/A",
+      { autofill: { mode: "test", ts: T0 - 3 * M, final: false, note: "test mode: would fill Trailer → RF 50388 · Document → 7732105 from " + fmtClock(T0 - 55 * M) + " (ON) (3 events)" } }),
+    tc("149", "RF 50102", "RF 50240", "loaded", "4410982", "ok", 95, "RF50240", "4410982"),
+    tc("118", "RF 50033", "RF 50410", "empty", "", "ok", 140, "RF 50410", "Empty"),
+    tc("311", "RF 50177", "RF 50291", "loaded", "8821004", "waiting", 6, null, null),
+    tc("609", "BM 7710", "BM 7742", "loaded", "BM-22871", "ok", 75, "BM 7742", "BM-22871"),
+    tc("520", "RF 50355", "RF 50199", "empty", "", "at_facility", 25, "RF 50355", "3390127"),
+    tc("626", "BM 7701", "BM 7766", "loaded", "BM-22904", "ok", 180, "BM7766", "BM-22904"),
+    tc("127", "RF 50061", "RF 50302", "loaded", "5520331", "ok", 220, "RF 50302", "5520331"),
+  ];
+
+  const violations = [
+    { company: "Ridgeline Freight", name: "Peter Novak", unit: "092", status: "DR", level: "Violation", kind: "violation", types: ["30-min break"], start: fmtClock(T0 - 4 * M) },
+    { company: "Ridgeline Freight", name: "Andre Mbeki", unit: "056", status: "DR", level: "Warning", kind: "warning", types: ["Drive limit soon"], start: fmtClock(T0 - 9 * M) },
+    { company: "Blue Mesa Logistics", name: "Raul Castillo", unit: "614", status: "DR", level: "Error", kind: "regular", types: ["Engine-hours change incorrect"], start: fmtClock(T0 - 40 * M) },
+    { company: "Ridgeline Freight", name: "Kevin Brooks", unit: "233", status: "SB", level: "Error", kind: "error", types: ["No Signature!"], start: "" },
+  ];
+  const violations_8d = [];
+  const v8 = (daysAgo, u, level, kind, type, start = "") => {
+    const d = D(u);
+    violations_8d.push({ day: fmtDay(T0 - daysAgo * 24 * H), name: d.name, unit: u, driver_id: d.driver_id, level, kind,
+      types: [type], start, company: d.company, company_id: d.company_id, status: d.status });
+  };
+  v8(0, "092", "Violation", "violation", "30-min break", fmtClock(T0 - 4 * M));
+  v8(1, "233", "Error", "error", "No Signature!"); v8(1, "402", "Error", "error", "No Signature!");
+  v8(2, "614", "Error", "error", "Odometer non-change while driving", "11:42:10 PM");
+  v8(2, "149", "Violation", "violation", "Shift limit"); v8(3, "305", "Error", "error", "No Signature!");
+  v8(4, "623", "Violation", "violation", "Drive limit"); v8(5, "611", "Error", "error", "No Signature!");
+  v8(6, "056", "Violation", "violation", "Cycle limit"); v8(7, "118", "Error", "error", "No Signature!");
+
+  const eld_changes = [];
+  const chg = (minsAgo, u, kind, change, extra) => {
+    const d = D(u);
+    eld_changes.push({ id: "demo" + eld_changes.length, ts: T0 - minsAgo * M, test: false, episode: "", kind, company: d.company,
+      company_id: d.company_id, driver_id: d.driver_id, unit: u, name: d.name, change, from_time: "", on_for: "", day: fmtDay(T0 - minsAgo * M),
+      place: "", place_kind: "", location: d.location, lat: null, lon: null, offline: false, checked: false, ...extra });
+  };
+  chg(14, "118", "sleeper", "ON → SB", { from_time: fmtClock(T0 - 14 * M), on_for: "1h 08m", place: "Pilot Travel Center", place_kind: "truck stop", lat: 34.77, lon: -84.97 });
+  chg(3, "214", "fill", "Trailer → RF 50388 · Document → 7732105", { test: true, from_time: fmtClock(T0 - 55 * M) + " (ON)", events: 3, place_kind: "group update", location: D("214").group });
+  chg(96, "264", "sleeper", "ON → SB", { from_time: fmtClock(T0 - 96 * M), on_for: "1h 02m", place: "Love's #233", place_kind: "truck stop", lat: 35.17, lon: -103.72, checked: true });
+  chg(130, "149", "fill", "Trailer → RF 50240 · Document → 4410982", { test: true, from_time: fmtClock(T0 - 150 * M) + " (ON)", events: 2, place_kind: "group update", location: D("149").group, checked: true });
+  chg(210, "611", "sleeper", "ON → SB", { from_time: fmtClock(T0 - 210 * M), on_for: "1h 15m", place: "TA Barstow", place_kind: "truck stop", lat: 34.85, lon: -117.0, offline: true });
+
+  const history = [];
+  const hist = (minsAgo, kind, unit, group, text, result = "") => history.push({ ts: T0 - minsAgo * M, kind, unit, group, text, result });
+  hist(2, "trailer_msg", "311", D("311").group, "Empty in# RF 50177\nLoaded out# RF 50291\nBOL# 8821004");
+  hist(6, "driver", "614", D("614").group, "@Raul\nHello Raul, your ELD device is disconnected. Please reconnect the ELD. Thank you!", "sent");
+  hist(9, "mention", "233", D("233").group, "Reply by Kevin: hours please, I need to know my 14", "sent");
+  hist(14, "resolved", "118", "", "✅ Daniel Okafor (Ridgeline Freight): ON for 1h 08m at truck stop — status set to Sleeper from now in FiveELD");
+  hist(21, "dm", "", "Private chat", "Private message from a dispatcher", "away_off");
+  hist(25, "trailer_msg", "520", D("520").group, "Loaded in# RF 50355\nEmpty out# RF 50199");
+  hist(38, "trailer_msg", "214", D("214").group, "Empty in# RF 50211\nLoaded out# RF 50388\nBOL# 7732105");
+  hist(44, "feed", "623", "Ridgeline Freight channel", "DOT: Marco Bianchi (Unit# 623) — 3.6 mi W of Oklahoma City, OK", "sent");
+  hist(46, "call", "", "ELD DEPARTMENT", "📞 Called Alex — not acknowledged in 5 min", "sent");
+  hist(49, "ack", "", "Bot", "✅ Got it — no call needed", "sent");
+  hist(60, "away_issue", "056", "bot to Alex", "Low drive time: Unit# 056 Andre Mbeki — 22 min left", "sent");
+  hist(75, "trailer_msg", "609", D("609").group, "Empty in# BM 7710\nLoaded out# BM 7742\nBOL# BM-22871");
+  hist(96, "resolved", "264", "", "✅ Felix Duarte (Ridgeline Freight): ON for 1h 02m at truck stop — status set to Sleeper in FiveELD");
+  hist(120, "escalation", "402", "Saved Messages", "🚨 Unit# 402 Ivan Petrov (Ridgeline Freight): Internet off\nReminded 2 times, not fixed for 45 min. Please check it yourself.", "sent");
+  hist(140, "trailer_msg", "118", D("118").group, "Loaded in# RF 50033\nEmpty out# RF 50410");
+  hist(180, "trailer_msg", "626", D("626").group, "Empty in# BM 7701\nLoaded out# BM 7766\nBOL# BM-22904");
+  hist(200, "driver", "149", D("149").group, "@Victor\nHello Victor, you have 28 min left until your 30-minute break. Please plan your break. Thank you!", "sent");
+  hist(220, "trailer_msg", "127", D("127").group, "Empty in# RF 50061\nLoaded out# RF 50302\nBOL# 5520331");
+  hist(26 * 60, "driver", "305", D("305").group, "@Luis\nHello Luis, please add your Trailer number in the ELD app. Thank you!", "sent");
+  hist(27 * 60, "resolved", "305", "", "✅ Luis Herrera: trailer added");
+
+  const messages = {
+    offline: "Hello {name}, your phone is offline (no internet). Please turn on your internet. Thank you!",
+    disconnected: "Hello {name}, your ELD device is disconnected. Please reconnect the ELD. Thank you!",
+    trailer_change: "Hello {name}, {what}. Please update in the ELD app — {todo}. Thank you!",
+    long_on: "Hello {name}, you have been On Duty for {duration}. If you are not working, please change your status to Sleeper. Thank you!",
+    shipping_doc: "Hello {name}, please add your Shipping Document (BOL #) in the ELD app. Thank you!",
+    trailer: "Hello {name}, please add your Trailer number in the ELD app. Thank you!",
+    low_break: "Hello {name}, you have {left} left until your 30-minute break. Please plan your break. Thank you!",
+    low_drive: "Hello {name}, you have {left} of driving time left. Please plan to stop. Thank you!",
+    low_shift: "Hello {name}, you have {left} left on your 14-hour shift. Please plan your stop. Thank you!",
+    low_cycle: "Hello {name}, you have {left} left on your 70-hour cycle. Thank you!",
+  };
+  const people = [{ id: 1, name: "Alex", username: "alex_eld" }, { id: 2, name: "Sam", username: "sam_nights" }];
+
+  const S = {
+    now: T0,
+    status: { paused: false, checking: false, last_check: T0 - 70, next_check: T0 + 230, last_duration: 82, restored: false,
+      check_started: T0 - 152, error: "", eld_logged_in: true, eld_account: { name: "ELD Desk", email: "desk@example.com" },
+      dry_run: true, tg_state: "ready", tg_error: "", tg_me: "ELD DEPARTMENT", tg_username: "eld_desk_demo",
+      tg_phone_masked: "+•••• 0000", tg_groups: 42, tg_backfilling: false, tg_last_backfill: [T0 - 8 * H, 12],
+      tg_code_via: "", tg_phone: "", tg_qr_id: "" },
+    issues, trailer_checks, drivers, violations, violations_8d, eld_changes, history,
+    config: { telegram_api_id: 12345678, dry_run: true, companies: { ...CO }, check_every_minutes: 5,
+      on_duty_statuses: ["DR", "ON", "YM"], offline_after_minutes: 10, eld_disconnect_after_minutes: 5, check_eld_connection: true,
+      send_kinds: ["offline", "disconnected", "trailer_change"], trailer_check_grace_minutes: 15, trailer_window_hours: 16,
+      notify_violations: false, alert_chat_id: null, alert_chat_title: "", away_alerts: false, bot_username: "eld_demo_bot",
+      bot_chat_id: 1, bot_chat_name: "Alex", bot_people: people, long_on_duty_minutes: 60, auto_sleeper: "test", auto_fill: "test",
+      remind_again_after_minutes: 15, max_reminders_before_escalation: 2, low_time_minutes: { break: 30, drive: 30, shift: 30, cycle: 60 },
+      auto_lock_minutes: 0, lock_enabled: false, companies_known: { ...CO, "Old Route Carriers": "demo-or" },
+      messages: { ...messages }, start_msg_id: 0, telegram_keys_set: true, bot_token_set: true, default_messages: messages },
+  };
+
+  // Keep the clock moving: checks every 5 minutes, timestamps stay "now"
+  function tick() {
+    const t = now();
+    S.now = t;
+    const st = S.status;
+    if (!st.paused && !st.checking && t >= st.next_check) { st.checking = true; st.check_started = t; }
+    if (st.checking && t - st.check_started > 6) {
+      st.checking = false; st.last_check = t; st.last_duration = 6 + Math.round(Math.random() * 4); st.next_check = t + 300;
+    }
+  }
+  const findIssue = (k) => S.issues.find((i) => i.key === k);
+  const ok = (extra = {}) => ({ ok: true, ...extra });
+
+  const POST = {
+    "/api/pause": (b) => { S.status.paused = !!b.paused; return ok(); },
+    "/api/mode": (b) => { S.config.dry_run = S.status.dry_run = !!b.dry_run; return ok(); },
+    "/api/check-now": () => { S.status.checking = true; S.status.check_started = now(); return ok(); },
+    "/api/issue/send": (b) => {
+      b.keys.forEach((k) => {
+        const i = findIssue(k);
+        if (!i) return;
+        i.last = now(); i.count += 1;
+        history.unshift({ ts: now(), kind: "driver", unit: i.unit, group: D(i.unit).group, text: i.text, result: "demo" });
+      });
+      return ok({ result: "demo" });
+    },
+    "/api/issue/ignore": (b) => {
+      b.keys.forEach((k) => { const i = findIssue(k); if (i) { if (b.hours) i.ignored_until = now() + b.hours * H; else i.muted = true; } });
+      return ok();
+    },
+    "/api/changes/check": (b) => { const c = eld_changes.find((x) => x.id === b.id); if (c) c.checked = !!b.checked; return ok(); },
+    "/api/away": (b) => {
+      S.config.away_alerts = !!b.on;
+      const p = people.find((x) => String(x.id) === String(b.person));
+      if (p) { S.config.bot_chat_id = p.id; S.config.bot_chat_name = p.name; }
+      return ok({ on: !!b.on, to: S.config.bot_chat_name });
+    },
+    "/api/settings": (b) => { Object.assign(S.config, b); if ("dry_run" in b) S.status.dry_run = b.dry_run; return ok(); },
+    "/api/bot/test-call": () => ok({ result: "demo, no call made" }),
+    "/api/telegram/alert-test": () => ok({ title: "demo (not sent)" }),
+    "/api/telegram/refresh": () => ok({ groups: 42 }),
+    "/api/telegram/rescan": () => ok({ hours: 16 }),
+    "/api/companies/refresh": () => ok({ found: 3 }),
+    "/api/export/messages": () => { throw new Error("Export is turned off in the demo"); },
+    "/api/fiveeld/switch": () => { throw new Error("Switching accounts is turned off in the demo"); },
+    "/api/telegram/logout": () => { throw new Error("Switching accounts is turned off in the demo"); },
+    "/api/password": () => { throw new Error("Passwords are turned off in the demo"); },
+    "/api/open/log": () => ok({ url: "" }),
+    "/api/open/chat": () => ok(),
+    "/api/app/quit": () => { throw new Error("The demo keeps running. In the real app this stops it."); },
+    "/api/report/send": () => ok(),
+    "/api/shift/new": () => ok(),
+    "/api/lock": () => ok(),
+  };
+  function report() {
+    const n = (t) => S.issues.filter((i) => i.type === t).length;
+    const text = [`Shift report (demo) — ${fmtClock(T0 - 4 * H)} to ${fmtClock(now())}`, "",
+      `Drivers watched: ${drivers.length}`, `Reminders sent: 9`, `Open now: ${S.issues.length} (${n("offline")} offline, ${n("trailer_change")} trailer)`,
+      `Auto Sleeper: ${eld_changes.filter((c) => c.kind === "sleeper").length} drivers set to SB`,
+      `Trailer updates checked: ${trailer_checks.length}`, `Violations today: ${violations.length}`].join("\n");
+    return { text, start: T0 - 4 * H };
+  }
+
+  const realFetch = window.fetch.bind(window);
+  const reply = (j, status = 200) => new Response(JSON.stringify(j), { status, headers: { "Content-Type": "application/json" } });
+  window.fetch = async (url, opt = {}) => {
+    const u = String(url);
+    if (!u.startsWith("/api/")) return realFetch(url, opt);
+    await new Promise((r) => setTimeout(r, 120));
+    const path = u.split("?")[0];
+    tick();
+    try {
+      if (path === "/api/state") return reply(JSON.parse(JSON.stringify(S)));
+      if (path === "/api/report") return reply(report());
+      if (path === "/api/bot/people") return reply({ ok: true, bot: S.config.bot_username, people, current: S.config.bot_chat_id });
+      const body = opt.body ? JSON.parse(opt.body) : {};
+      const h = POST[path];
+      return reply(h ? h(body) : ok({ result: "demo" }));
+    } catch (e) { return reply({ error: e.message }, 400); }
+  };
+})();
+
+</script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+
+// ---------------------------------------------------------------- belgilar (emoji o'rniga bir xil uslubdagi SVG)
+const ICONS = {
+  refresh: '<path d="M20 11a8 8 0 0 0-14.6-4.5L3 9"/><path d="M3 4v5h5"/><path d="M4 13a8 8 0 0 0 14.6 4.5L21 15"/><path d="M21 20v-5h-5"/>',
+  pause: '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',
+  play: '<path d="M7 4.5v15l12-7.5z"/>',
+  lock: '<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  unlock: '<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 7.7-1.5"/>',
+  clipboard: '<rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h5"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4V5z"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+  swap: '<path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/>',
+  truck: '<path d="M2.5 6.5h11v9h-11zM13.5 9.5h4l3 3.5v2.5h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+  alert: '<path d="M12 3.5 2.5 20h19L12 3.5z"/><path d="M12 10v4.5M12 17.2v.3"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  check: '<circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.3 2.4 2.4 4.8-5"/>',
+  x: '<circle cx="12" cy="12" r="8.5"/><path d="m9.2 9.2 5.6 5.6M14.8 9.2l-5.6 5.6"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  plug: '<path d="M9 3v5M15 3v5M6.5 8h11v3a5.5 5.5 0 0 1-11 0zM12 16.5V21"/>',
+  monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/>',
+  phone: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>',
+  download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>',
+  undo: '<path d="M4 9h11a5 5 0 0 1 0 10H8"/><path d="M7.5 5.5 4 9l3.5 3.5"/>',
+  flask: '<path d="M9.5 3h5M10.5 3v6L5 19a1.3 1.3 0 0 0 1.2 2h11.6a1.3 1.3 0 0 0 1.2-2l-5.5-10V3"/><path d="M7.5 15h9"/>',
+  live: '<circle cx="12" cy="12" r="3.5"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4"/>',
+  building: '<path d="M3.5 21V9l6 3.5V9l6 3.5V4.5h5V21z"/><path d="M2 21h20"/>',
+  image: '<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m20.5 16-5-5-8.5 8.5"/>',
+  camera: '<path d="M3.5 8h4l1.8-2.5h5.4L16.5 8h4v11h-17z"/><circle cx="12" cy="13" r="3.5"/>',
+  edit: '<path d="M14.5 5.5l4 4L8 20H4v-4z"/><path d="M12.5 7.5l4 4"/>',
+  stop: '<path d="M8.3 3h7.4L21 8.3v7.4L15.7 21H8.3L3 15.7V8.3z"/><path d="M8 12h8"/>',
+  trailer: '<path d="M2.5 6.5h15v10h-15zM17.5 14h4"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="12" cy="18.5" r="1.8"/>',
+  send: '<path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/>',
+  file: '<path d="M6 2.5h8.5L19 7v14.5H6z"/><path d="M14 2.5V7h5M9 12h7M9 16h5"/>',
+};
+// ic("check") -> <svg ...>. Matn ichida ishlatiladi (tugma, yorliq, sarlavha)
+const ic = (name, cls = "") => ICONS[name]
+  ? `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>` : "";
+// Matn boshidagi emoji -> belgi: "✅ Saved" -> [check] Saved (toast, yorliq va h.k. uchun; matn esc qilinadi)
+const EMO = { "✅": "check", "❌": "x", "⏳": "clock", "⏱": "clock", "🧪": "flask", "🟢": "live", "🏭": "building",
+              "🖼": "image", "📷": "camera", "⚠": "alert", "🚨": "alert", "⛔": "stop", "🚛": "trailer",
+              "🔒": "lock", "🔓": "unlock", "✏": "edit" };
+function emo(text) {
+  const m = String(text ?? "").match(/^(\S+?)️?\s+([\s\S]*)$/u);
+  return m && EMO[m[1]] ? ic(EMO[m[1]]) + esc(m[2]) : esc(text);
+}
+const stripEmo = (text) => String(text ?? "").replace(/^(\S+?)️?\s+/u, (all, e) => (EMO[e] ? "" : all));
+// HTML dagi <i data-ic="..."></i> joylarini to'ldirish (sahifa ochilganda bir marta)
+document.querySelectorAll("[data-ic]").forEach((el) => { el.outerHTML = ic(el.dataset.ic); });
+let S = null;            // oxirgi /api/state
+let settingsLoaded = false;
+let lastActivity = Date.now();
+
+const KIND = {
+  offline: ["Internet off", "t-red"],
+  disconnect: ["ELD disconnected", "t-red"],
+  long_on: ["Stuck in ON", "t-amber"],
+  trailer_change: ["Trailer not updated", "t-red"],
+  shipping_doc: ["No BOL", "t-amber"],
+  trailer: ["No trailer", "t-amber"],
+  low_break: ["Low break", "t-blue"],
+  low_drive: ["Low drive", "t-blue"],
+  low_shift: ["Low shift", "t-blue"],
+  low_cycle: ["Low cycle", "t-blue"],
+};
+const VKIND = {  // FiveELD dagi rang
+  violation: ["Violation", "t-red"], error: ["Error", "t-red"],
+  regular: ["Error", "t-gray"], warning: ["Warning", "t-amber"],
+};
+const IMPORTANT = new Set(["violation", "error"]);
+const LOW_WARN = { break: 30, drive: 30, shift: 30, cycle: 60 };
+
+function hhmm(min) {
+  if (min === null || min === undefined) return '<span class="muted">—</span>';
+  const s = `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
+  return s;
+}
+const HIST_KIND = {
+  driver: ["To driver", "t-blue"], escalation: ["🚨 To me", "t-red"], violation: ["⛔ Violation", "t-red"],
+  resolved: ["✅ Resolved", "t-green"], system: ["System", "t-gray"],
+  trailer_msg: ["🚛 Group message", "t-blue"], mention: ["🔔 Tagged me", "t-amber"], dm: ["💬 Private message", "t-amber"], feed: ["🚨 FiveELD alert", "t-red"], away_issue: ["📱 Away alert", "t-amber"], call: ["📞 Call", "t-amber"], ack: ["✅ Got it", "t-green"],
+};
+const RESULT = {
+  sent: ["Sent", "t-green"], test: ["TEST (Saved Msgs)", "t-amber"],
+  no_group: ["Group not found", "t-red"], offline: ["Telegram not connected", "t-gray"],
+  away_off: ["Not sent (Away alerts off)", "t-gray"],
+};
+
+// ---------------------------------------------------------------- yordamchilar
+// "1 driver" / "5 drivers"
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function tag(text, cls) { return `<span class="tag ${cls}">${emo(text)}</span>`; }
+function ago(ts) {
+  if (!ts) return "—";
+  const m = Math.floor((S.now - ts) / 60);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  return `${h} h ${m % 60} min ago`;
+}
+function clock(ts) {
+  const d = new Date(ts * 1000);
+  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+function toast(msg) {
+  const t = $("toast");
+  t.innerHTML = emo(msg);  // "✅ Saved" -> belgi + matn (matn xavfsiz: esc qilinadi)
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+async function api(url, body, poll = false) {
+  const opt = { headers: { "X-Requested-With": "eld" } };
+  if (poll) opt.headers["X-Poll"] = "1";
+  if (body !== undefined) {
+    opt.method = "POST";
+    opt.headers["Content-Type"] = "application/json";
+    opt.body = JSON.stringify(body);
+  }
+  const r = await fetch(url, opt);
+  if (r.status === 401) { throw new Error("locked"); }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || "Error");
+  return j;
+}
+
+// ---------------------------------------------------------------- tablar
+const PAGE_TITLES = { overview: "Overview", drivers: "Drivers", violations: "Violations",
+                      changes: "ELD changes", history: "Message history", settings: "Settings" };
+// Diqqat talab qiladigan raqam: 0 bo'lsa kulrang (jim), aks holda o'z rangida yonadi
+function setKpi(id, n) {
+  $(id).textContent = n;
+  $(id).closest(".kpi").classList.toggle("kpi-quiet", !n);
+}
+
+function showTab(tab) {
+  document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("active", x.dataset.tab === tab));
+  document.querySelectorAll("[data-page]").forEach((p) => p.classList.toggle("hidden", p.dataset.page !== tab));
+  $("pageTitle").textContent = PAGE_TITLES[tab] || "";
+  scrollTo(0, 0);
+}
+document.querySelectorAll("#tabs button").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
+
+// Raqam kartochkalari: bosilsa tegishli bo'lim ochiladi
+document.querySelectorAll(".kpi[data-go]").forEach((k) => k.addEventListener("click", () => {
+  const go = k.dataset.go;
+  if (PAGE_TITLES[go]) {
+    if (go === "drivers") { drvFilter = "duty"; selectSeg("drvSeg", "dfilter", "duty"); $("drvSearch").value = ""; S && renderDrivers(); }
+    if (go === "violations") { violFilter = "red"; selectSeg("violSeg", "vfilter", "red"); S && renderViolations(); }
+    showTab(go);
+  } else {
+    if (go === "infoPanel") $("infoPanel").open = true;
+    $(go).scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}));
+
+// ---------------------------------------------------------------- render
+function render() {
+  const st = S.status, cfg = S.config;
+
+  // header
+  $("modePill").innerHTML = emo(st.dry_run ? "🧪 TEST mode" : "🟢 LIVE mode");
+  // Qulf o'chirilgan bo'lsa "Lock" tugmasi va auto-lock sozlamasi kerak emas
+  const locked = cfg.lock_enabled !== false;
+  $("btnLock").classList.toggle("hidden", !locked);
+  if ($("lockConfirm").classList.contains("hidden")) $("optLock").checked = locked;
+  // Qulf o'chiq — parolni o'zgartirish va auto-lock kerak emas (yashiriladi)
+  $("pwCard").classList.toggle("hidden", !locked);
+  $("autoLockRow").classList.toggle("hidden", !locked);
+  $("modePill").className = "mode-pill " + (st.dry_run ? "mode-test" : "mode-live");
+  $("btnPause").innerHTML = st.paused ? ic("play") + "Resume" : ic("pause") + "Pause";
+
+  // banner
+  const banners = [];
+  if (st.error) banners.push(`<div class="banner red">${esc(st.error)}</div>`);
+  // Tekshiruv uzoq vaqt bo'lmadi (masalan FiveELD sessiyasi tugagan) — ko'zga tashlanadigan ogohlantirish
+  const staleAfter = Math.max(15 * 60, 3 * (cfg.check_every_minutes || 5) * 60);
+  if (!st.paused && st.last_check && S.now - st.last_check > staleAfter)
+    banners.push(`<div class="banner red">${ic("alert")}No successful check for ${dur(st.last_check)} — the data below may be old.
+      FiveELD may be logged out: click <b>FiveELD</b> at the top to open it.</div>`);
+  if (st.tg_state !== "ready") banners.push(`<div class="banner amber">Telegram is not connected — no messages are sent. Connect it in <b>Settings</b>.</div>`);
+  $("banner").innerHTML = banners.join("");
+
+  // Yuqoridagi holat belgilari (avval alohida kartochkalar edi)
+  const chip = (id, state, text, title) => {
+    $(id).innerHTML = `<span class="dot ${state}"></span>${esc(text)}`;
+    if (title !== undefined) $(id).title = title;
+  };
+  chip("chipMon", st.error ? "bad" : st.paused ? "warn" : "ok",
+    st.paused ? "Paused" : st.checking ? "Checking…" : "Monitor");
+  chip("btnShowEld", st.eld_logged_in ? "ok" : "bad", st.eld_logged_in ? "FiveELD" : "FiveELD: log in");
+  const tgNames = { ready: "Telegram", no_keys: "Telegram: no keys", need_phone: "Telegram: log in", need_qr: "Telegram: scan QR",
+                    need_code: "Telegram: code", need_2fa: "Telegram: 2FA", error: "Telegram: error" };
+  chip("chipTg", st.tg_state === "ready" ? "ok" : "bad", tgNames[st.tg_state] || "Telegram",
+    st.tg_state === "ready" ? `${st.tg_me} · ${st.tg_groups} Unit# groups` : (st.tg_error || "Open Telegram settings"));
+  // Away alerts — holat belgisi emas, tugma: yoqilganda to'q sariq, kimga borayotgani bilan
+  const away = !!S.config.away_alerts;
+  const awayTo = (S.config.bot_token_set && S.config.bot_chat_name) || S.config.alert_chat_title || "";
+  const ab = $("btnAway");
+  ab.classList.toggle("on", away);
+  ab.innerHTML = away
+    ? `<span class="away-pulse"></span>${ic("bell")}<span>Away${awayTo ? ` · ${esc(awayTo)}` : ""}</span>`
+    : `${ic("bell")}<span>Away alerts</span>`;
+  ab.title = away ? `Alerts go to ${awayTo || "Saved Messages"}. Click when you are back to turn off.`
+                  : "Leaving? Turn on — tags, private messages, DOT and new problems will be sent to your phone.";
+  chip("btnMode", st.dry_run ? "warn" : "ok", st.dry_run ? "Test mode" : "Live mode",
+    st.dry_run ? "Test mode: messages go to your Saved Messages. Click to switch to live." : "Live mode. Click to switch back to test.");
+  // Yuqoridagi raqamlar
+  const onDuty = (s) => S.drivers.filter((d) => d.status === s).length;
+  $("kDR").textContent = S.drivers.length ? onDuty("DR") : "–";
+  $("kON").textContent = S.drivers.length ? onDuty("ON") + onDuty("YM") : "–";
+  // Kartalar ostidagi qisqa izoh
+  $("kDRsub").textContent = S.drivers.length ? `of ${plural(S.drivers.length, "driver")}` : "";
+  const stuck = S.issues.filter((i) => i.type === "long_on").length;
+  $("kONsub").textContent = S.drivers.length ? (stuck ? `${stuck} stuck over ${S.config.long_on_duty_minutes || 60}m` : "none stuck") : "";
+  const trl = (S.trailer_checks || []).filter((c) => ["waiting", "mismatch", "review"].includes(c.status));
+  setKpi("kTrl", trl.length);
+  const nNot = trl.filter((c) => c.status === "mismatch").length, nWait = trl.filter((c) => c.status === "waiting").length,
+    nRev = trl.filter((c) => c.status === "review").length;
+  $("kTrlSub").textContent = trl.length
+    ? [nNot && `${nNot} not updated`, nWait && `${nWait} waiting`, nRev && `${nRev} to review`].filter(Boolean).join(" · ")
+    : "all updated";
+  const v8 = new Set((S.violations_8d || []).map((v) => `${v.unit}|${v.name}`)).size;
+  $("kViolSub").textContent = `today · ${v8} in last 8 days`;
+  // Qizil violation'i bor driverlar soni (Violations sahifasidagi "Important" bilan bir xil)
+  setKpi("kViol", violDrivers());
+  // "Checking now… 0m 45s · Last check 23:49 (took 2m 09s) · next 23:54 · 96 drivers"
+  const took = (sec) => `${Math.floor(sec / 60)}m ${String(Math.round(sec % 60)).padStart(2, "0")}s`;
+  $("topSub").textContent = (st.checking && st.check_started ? `Checking now… ${took(S.now - st.check_started)} · ` : "") +
+    `Last check ${st.last_check ? clock(st.last_check) : "—"}` + (st.last_duration ? ` (took ${took(st.last_duration)})` : "") +
+    (st.restored ? " · showing data from before restart" : "") +
+    (st.next_check && !st.paused && !st.checking ? ` · next ${clock(st.next_check)}` : "") +
+    ` · ${plural(S.drivers.length, "driver")}`;
+
+
+  const lb = st.tg_last_backfill;
+  $("rescanHint").innerHTML = emo(st.tg_backfilling ? "⏳ Reading Unit# groups..."
+    : lb ? `Last read: ${clock(lb[0])} (last ${lb[1]} h). Lower the window after the first read to make checks lighter.`
+    : "Groups are read automatically when the program starts.");
+  $("trailerWindow").textContent = `last ${cfg.trailer_window_hours} h`;
+
+  renderIssues();
+  renderTrailers();
+  renderDrivers();
+  renderViolations();
+  renderChanges();
+  renderHistory();
+  renderDriverPanel();
+  renderTelegramPanel();
+  if (!settingsLoaded) loadSettings(cfg);
+}
+
+// Qanchalik shoshilinch: 0 — Telegramga ketadigan aloqa/trailer muammolari, 3 — vaqt kam qolgani
+const SEV = { offline: 0, disconnect: 0, trailer_change: 0, long_on: 1, shipping_doc: 2, trailer: 2,
+              low_break: 3, low_drive: 3, low_shift: 3, low_cycle: 3 };
+const sev = (i) => SEV[i.type] ?? 2;
+
+const NEW_SEC = 10 * 60;  // shuncha vaqt "NEW" belgisi turadi
+const isNew = (ts) => ts && S.now - ts < NEW_SEC;
+const newTag = () => `<span class="new-pill">NEW</span>`;
+
+// "25 min" / "1 h 05 min" — qancha vaqtdan beri
+function dur(ts) {
+  const m = Math.max(0, Math.floor((S.now - ts) / 60));
+  if (m < 1) return "<1 min";
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min`;
+}
+
+// Qisqa vaqt: "4m" / "1h 30m"
+function short(sec) {
+  const m = Math.max(0, Math.round(sec / 60));
+  return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`;
+}
+
+// To'liq tafsilot — sichqonchani yorliq ustiga olib borganda chiqadi (kartochkada matn ko'p bo'lmasin)
+function issueTip(i) {
+  const [label] = KIND[i.type] || [i.type];
+  const start = i.since || i.first;  // since — FiveELD belgisi / guruh xabari bo'yicha haqiqiy boshlanish
+  const parts = [label + (i.detail ? `: ${i.detail}` : ""), `for ${dur(start)} (since ${clock(start)})`];
+  if (i.ignored_until > S.now) parts.push(`ignored until ${clock(i.ignored_until)}`);
+  else if (i.count) parts.push(`sent ${i.count}× (last ${clock(i.last)})`);
+  else if (i.muted) parts.push("dashboard only — not sent automatically");
+  else if (i.waiting_until) parts.push(`sends at ${clock(i.waiting_until)}`);
+  if (i.escalated) parts.push("escalated to you");
+  return parts.join(" · ");
+}
+
+// Kartochkadagi BITTA holat yozuvi: nima bo'lyapti
+function cardState(g) {
+  const act = g.items.filter((i) => !i.muted && !(i.ignored_until > S.now));
+  if (!act.length) {
+    const ign = g.items.find((i) => i.ignored_until > S.now);
+    return ign ? `<span class="muted">Ignored till ${clock(ign.ignored_until)}</span>` : `<span class="muted">Dashboard only</span>`;
+  }
+  const wait = act.filter((i) => !i.count && i.waiting_until).map((i) => i.waiting_until);
+  if (wait.length) {
+    const s = Math.min(...wait) - S.now;
+    return `<span class="when-soon">${ic("clock")}${s > 0 ? "in " + short(s) : "next check"}</span>`;
+  }
+  const n = Math.max(...act.map((i) => i.count));
+  if (n) return `<span class="${g.bucket === "you" ? "st-bad" : "muted"}">Sent ${n}× · ${clock(Math.max(...act.map((i) => i.last)))}</span>`;
+  return `<span class="muted">Not sent</span>`;
+}
+
+// Bitta driver — bitta qator (Telegramga ham bitta umumiy xabar ketadi)
+function driverCard(g, keys) {
+  const top = g.items[0];
+  const anyIgnored = g.items.every((i) => i.ignored_until > S.now);
+  const tags = g.items.map((i) => {
+    const [label, cls] = KIND[i.type] || [i.type, "t-gray"];
+    const dim = i.muted || i.ignored_until > S.now;
+    return `<span class="tag ${cls}${dim ? " tag-dim" : ""}" title="${esc(issueTip(i))}">${esc(label)}</span>`;
+  }).join("");
+  const k = esc(JSON.stringify(keys)), u = esc(top.unit || "");
+  const pending = pendingSend && pendingSend.id === JSON.stringify(keys);
+  return `<div class="drv-card sev-${g.sev}${g.isNew ? " is-new" : ""}">
+    <div class="drv-unit" title="Unit#">${u || "—"}</div>
+    <div class="drv-who"><b class="drv-link" data-drv="${esc(top.name)}" data-unit="${u}" title="${esc(top.name)} · ${esc(top.company)} — open driver card">${esc(top.name)}</b>
+      <div class="drv-state"><span class="st st-${esc(top.status)}">${esc(top.status)}</span>${cardState(g)}
+        <span class="muted" title="Going on since ${clock(g.since)}">· ${short(S.now - g.since)}</span></div></div>
+    <div class="drv-tags">${g.isNew ? newTag() : ""}${tags}</div>
+    <div class="drv-actions">
+      ${u ? linkBtns(top.unit, top.key, top.name) : ""}
+      <button class="small send-btn" data-act="send" data-keys="${k}" data-unit="${u}"${pending ? " disabled" : ""}>${pending ? "Sending…" : "Send"}</button>
+      ${anyIgnored ? `<button class="small" data-act="unignore" data-keys="${k}" title="Stop ignoring">Un-ignore</button>`
+                   : `<button class="small" data-act="ignore" data-keys="${k}" title="Hide reminders for 1 hour">Ignore</button>`}
+    </div></div>`;
+}
+
+let showTrlOk = false;
+let infoAutoOpened = false;  // "Alerts off" ro'yxati avtomatik bir marta ochiladi (foydalanuvchi yopsa — yopiq qoladi)
+let knownKeys = null;  // bildirishnoma faqat YANGI muammolar uchun (birinchi yuklashda emas)
+
+function renderIssues() {
+  const isIgn = (i) => i.ignored_until > S.now;
+  const maxRem = S.config.max_reminders_before_escalation || 3;
+  const tgOk = S.status.tg_state === "ready";
+  // Driver bo'yicha guruhlash
+  const groups = new Map();
+  for (const i of S.issues) {
+    const id = `${i.unit}|${i.name}`;
+    if (!groups.has(id)) groups.set(id, { items: [] });
+    groups.get(id).items.push(i);
+  }
+  const you = [], bot = [], wait = [], info = [];
+  for (const g of groups.values()) {
+    const act = g.items.filter((i) => !i.muted && !isIgn(i));
+    g.items.sort((a, b) => sev(a) - sev(b) || (a.muted ? 1 : 0) - (b.muted ? 1 : 0));
+    g.sev = Math.min(...(act.length ? act : g.items).map(sev));
+    g.esc = g.items.some((i) => i.escalated);
+    g.first = Math.min(...g.items.map((i) => i.first || S.now));
+    g.since = Math.min(...(act.length ? act : g.items).map((i) => i.since || i.first || S.now));
+    g.isNew = act.some((i) => isNew(i.first));
+    g.keys = (act.length ? act : g.items).map((i) => i.key);
+    if (!act.length) { info.push(g); continue; }
+    // Kimning navbati: men (eskalatsiya / ko'p eslatildi / bot yubora olmaydi), bot (hali yubormagan), driver (yuborilgan)
+    if (act.some((i) => i.escalated || (!i.once && i.count >= maxRem))) you.push(g);
+    else if (act.some((i) => !i.count)) (tgOk ? bot : you).push(g);
+    else wait.push(g);
+  }
+  you.forEach((g) => { g.bucket = "you"; });
+  const order = (a, b) => (b.isNew - a.isNew) || (b.esc - a.esc) || (a.sev - b.sev) || (a.first - b.first);
+  [you, bot, wait, info].forEach((l) => l.sort(order));
+
+  const fill = (grp, list, n, items) => {
+    $(grp).classList.toggle("hidden", !items.length);
+    $(n).textContent = items.length || "";
+    $(list).innerHTML = items.map((g) => driverCard(g, g.keys)).join("");
+  };
+  fill("grpYou", "listYou", "nYou", you);
+  $("grpYou").querySelector(".grp-head").title = tgOk
+    ? "Reminded the maximum number of times and still not fixed — check these yourself"
+    : "Telegram is not connected — the bot can't send these";
+  fill("grpBot", "listBot", "nBot", bot);
+  fill("grpWait", "listWait", "nWait", wait);
+  const nAct = you.length + bot.length + wait.length;
+  $("actionEmpty").classList.toggle("hidden", nAct > 0);
+  // Yuboriladigan narsa yo'q, lekin alerti o'chiq muammolar bor — "All good" demaymiz, ro'yxatni ochamiz (bir marta)
+  $("actionEmptyText").textContent = info.length
+    ? `Nothing to send — ${plural(info.length, "driver")} with alerts off below`
+    : "All good — nobody needs a message right now";
+  if (!nAct && info.length && !infoAutoOpened) { $("infoPanel").open = true; infoAutoOpened = true; }
+  if (!info.length) infoAutoOpened = false;
+  $("actionSummary").textContent = nAct ? plural(nAct, "driver") : "";
+
+  setKpi("kIssues", you.length);
+  $("kIssuesSub").textContent = you.length ? `oldest ${dur(Math.min(...you.map((g) => g.since)))}` : "all good";
+  $("cIssues").textContent = you.length || "";
+  $("cIssues").classList.toggle("hidden", !you.length);
+  $("infoCount").textContent = info.length || "";
+  $("infoList").innerHTML = info.length
+    ? info.map((g) => driverCard(g, g.keys)).join("")
+    : `<div class="empty">Nothing here</div>`;
+
+  // Yorliq sarlavhasi: "(2) NEW · ELD Monitor"
+  const nNew = [...you, ...bot, ...wait].filter((g) => g.isNew).length;
+  document.title = (you.length ? `(${you.length}) ` : "") + (nNew ? "NEW · " : "") + "ELD Monitor";
+
+  // Yangi (Telegramga ketadigan) muammolar uchun bildirishnoma / ovoz
+  const live = S.issues.filter((i) => !i.muted);
+  if (knownKeys) {
+    const fresh = live.filter((i) => !knownKeys.has(i.key));
+    if (fresh.length) alertNew(fresh);
+  }
+  knownKeys = new Set(live.map((i) => i.key));
+}
+
+function renderTrailers() {
+  const rows = [...(S.trailer_checks || [])];
+  if (!rows.length) {
+    $("trailersList").innerHTML = `<div class="empty">No trailer messages yet</div>`;
+    $("btnTrlOk").classList.add("hidden"); $("trailersOk").classList.add("hidden");
+    return;
+  }
+  // ELD qiymati: to'g'ri bo'lsa yashil, noto'g'ri bo'lsa qizil
+  const val = (list, ok) => {
+    if (list === null || list === undefined) return '<span class="muted">not checked yet</span>';
+    const txt = list.length ? list.map(esc).join(", ") : '<span class="muted">empty</span>';
+    return ok === false ? `<span style="color:var(--red);font-weight:600">${txt}</span>`
+      : ok === true ? `<span style="color:var(--green)">${txt}</span>` : txt;
+  };
+  const ST = { ok: ["✅ Updated", "t-green"], waiting: ["⏳ Waiting", "t-amber"], mismatch: ["❌ Not updated", "t-red"],
+               at_facility: ["🏭 At facility (no out yet)", "t-gray"],
+               review: ["🖼 A different load's document (BOL) was posted after the update — maybe a new load, check it", "t-amber"] };
+  // Muammolilari tepada, keyin eng yangi xabarlar
+  const RANK = { mismatch: 0, review: 1, waiting: 2, at_facility: 3, ok: 4 };
+  rows.sort((a, b) => (RANK[a.status] ?? 3) - (RANK[b.status] ?? 3) || b.msg_ts - a.msg_ts);
+  // Qisqa holat nomlari; to'liq izoh — sichqonchani ustiga olib borganda
+  const SHORT = { ok: "✅ Updated", waiting: "⏳ Waiting", mismatch: "❌ Not updated", at_facility: "🏭 At facility", review: "🖼 New load?" };
+  const item = (c) => {
+    let [sl, sc] = ST[c.status] || [c.status, "t-gray"];
+    let short_ = SHORT[c.status] || sl;
+    if (c.status === "ok" && c.confirmed_by_bol) [sl, short_] = ["✅ Confirmed by BOL", "✅ BOL"];
+    else if (c.status === "ok" && c.trailer_by_photo && c.template_outdated)
+      [sl, short_] = ["✅ Driver posted a photo of a newer trailer and it is in ELD (the group update is older)", "✅ New trailer (photo)"];
+    else if (c.status === "ok" && c.trailer_by_photo) [sl, short_] = ["✅ Trailer confirmed by photo", "✅ Photo"];
+    else if (c.status === "waiting" && !c.checked && S.now - c.msg_ts > 3600)
+      [sl, short_, sc] = ["Not checked for over an hour: this Telegram group is not matched to a driver in FiveELD " +
+                          "(or the driver page could not be read). Check it manually.", "⚠ Not checked", "t-red"];
+    else if (c.status === "review" && c.photo_trailer)
+      [sl, short_] = [`📷 Driver posted a photo of trailer ${c.photo_trailer} after the update, but ELD shows ` +
+                      `${(c.eld || []).join(", ") || "nothing"} — new pickup? Check and update.`, "📷 New trailer?"];
+    else if (c.status === "ok" && c.new_trailer_after_bobtail) [sl, short_] = ["✅ New trailer after bobtail (no group update)", "✅ New trailer"];
+    // Hujjat/rasm qisman o'qilgan bo'lsa — izohga qo'shamiz
+    const bolNote = c.bol && c.bol.msgs && !c.confirmed_by_bol
+      ? ` · Photos/BOL read: trailer ${c.bol.trailer ? "✓" : "?"}, BOL # ${c.bol.bol ? "✓" : "?"}` : "";
+    const need = { empty: "should be Empty", loaded: "should be BOL #", bobtail: "should be N/A" }[c.out_kind] || "";
+    // Raqam yozilmagan ("picked up empty") — turi ma'lum, raqami yo'q
+    const outTxt = c.out.length ? c.out.map(esc).join(", ") : c.has_out ? "?" : "—";
+    // "Bobtail bobtail" kabi takrorlanmasin
+    const kind = c.out_kind && !outTxt.toLowerCase().includes(c.out_kind)
+      ? ` <span class="muted">${esc(c.out_kind)}</span>` : "";
+    // Harakat qatori: live — trailer o'sha ("Live unload · HMKD 800417"); facility da — nima tashlagani;
+    // oddiy — "in → out"
+    const inTxt = c.in.map(esc).join(", ");
+    const move = c.live
+      ? `<span class="muted">Live ${c.out_kind === "empty" ? "unload" : "load"}</span> · <b>${c.out.map(esc).join(", ") || "same trailer"}</b>`
+      : c.status === "at_facility"
+        ? `<span class="muted">At facility${inTxt ? " · dropped" : ""}</span> ${inTxt ? `<b>${inTxt}</b>` : ""}`
+        : `${inTxt || "—"} <span class="trl-arrow">→</span> <b>${outTxt}</b>${kind}`;
+    const st = ["mismatch"].includes(c.status) ? "bad" : ["waiting", "review"].includes(c.status) ? "warn" : c.status === "ok" ? "ok" : "";
+    const fresh = c.status !== "ok" && isNew(c.msg_ts);
+    // ELD qatori faqat nimadir noto'g'ri bo'lsa ko'rinadi
+    const bad = c.status !== "ok" && (c.trailer_ok === false || c.doc_ok === false);
+    const eldLine = bad ? `<div class="trl-eld"><span><span class="muted">ELD:</span> ${val(c.eld, c.trailer_ok)}</span>
+        <span><span class="muted">Doc:</span> ${val(c.eld_docs, c.doc_ok)}${need && c.doc_ok === false ? ` <span class="muted">(${need})</span>` : ""}</span></div>` : "";
+    return `<div class="trl-item trl-${st}${fresh ? " is-new" : ""}">
+      <div class="trl-top">${fresh ? newTag() : ""}<b>${esc(c.unit)}</b><span class="trl-name drv-link" data-drv="${esc(c.name || "")}" data-unit="${esc(c.unit || "")}">${esc(c.name) || "—"}</span>
+        <span class="tag ${sc}" title="${esc(stripEmo(sl) + bolNote)}">${emo(short_)}</span>
+        <span class="trl-icons">${linkBtns(c.unit, "", c.name, c.gkey)}</span></div>
+      <div class="trl-move">${move}
+        ${c.edited ? `<span class="muted" title="The group message was edited">${ic("edit")}</span>` : ""}
+        <span class="muted trl-time" title="${clock(c.msg_ts)}">${short(S.now - c.msg_ts)} ago</span></div>
+      ${eldLine}</div>`;
+  };
+  // Tasdiqlanganlar (✅) va "facility da" (hali chiqmagan — tekshiradigan narsa yo'q) yig'ilib turadi
+  const quiet = (c) => c.status === "ok" || c.status === "at_facility";
+  const open = rows.filter((c) => !quiet(c)), ok = rows.filter(quiet);
+  $("trailersList").innerHTML = open.length ? open.map(item).join("")
+    : `<div class="empty">${ic("check")}No open trailer checks</div>`;
+  $("btnTrlOk").classList.toggle("hidden", !ok.length);
+  const nFac = ok.filter((c) => c.status === "at_facility").length;
+  $("btnTrlOk").textContent = `${showTrlOk ? "▾ Hide" : "▸ Show"} confirmed (${ok.length - nFac})` +
+    (nFac ? ` · at facility (${nFac})` : "");
+  $("trailersOk").classList.toggle("hidden", !showTrlOk || !ok.length);
+  $("trailersOk").innerHTML = showTrlOk ? ok.map(item).join("") : "";
+}
+
+// Filtr tugmalari holati (Drivers / Violations / History)
+let drvFilter = "duty", violFilter = "red", histFilter = "all";
+const histOpen = new Set();  // ochib qo'yilgan uzun xabarlar
+// 📋 / 💬 tugmalari. Ism va kalit ham yuboriladi — bir xil raqamli trucklar ("1", "01", "001") adashmasin
+function linkBtns(unit, key = "", name = "", gkey = "") {
+  if (!unit && !gkey) return "";
+  const a = `data-unit="${esc(unit)}" data-key="${esc(key)}" data-name="${esc(name)}" data-gkey="${esc(gkey || "")}"`;
+  return `<span class="row-icons">
+  <button class="icon-btn" data-open="log" ${a} title="Open today's log in FiveELD">${ic("file")}</button>
+  <button class="icon-btn" data-open="chat" ${a} title="Open the Telegram group">${ic("chat")}</button></span>`;
+}
+function setSegCounts(segId, attr, counts) {
+  document.querySelectorAll(`#${segId} button`).forEach((b) => { b.querySelector("span").textContent = counts[b.dataset[attr]] ?? ""; });
+}
+
+// Aloqa: ikkita nuqta — internet va ELD (tafsiloti sichqoncha ostida)
+function connCell(d) {
+  const dot = (v, okT, badT) => v === true ? `<span class="cdot ok" title="${okT}"></span>`
+    : v === false ? `<span class="cdot bad" title="${badT}"></span>` : `<span class="cdot" title="Not checked"></span>`;
+  return `<span class="conn">${dot(d.online, "Internet: online", "Internet: OFFLINE · last seen " + esc(d.last_seen || "—"))}${
+    dot(d.eld, "ELD: connected", "ELD: DISCONNECTED")}</span>`;
+}
+
+// Qolgan soat: raqam + kichik chiziq (kam qolsa sariq / qizil)
+const HOURS_MAX = { break: 480, drive: 660, shift: 840, cycle: 4200 };
+function hoursCell(d, part) {
+  const v = (d.left || {})[part];
+  if (v === null || v === undefined) return `<td class="muted">—</td>`;
+  const lim = (S.config.low_time_minutes || LOW_WARN)[part] || 0;
+  const active = ["DR", "ON"].includes(d.status);
+  const cls = active && v <= lim ? "bad" : active && v <= lim * 2 ? "warn" : "ok";
+  const pct = Math.max(3, Math.min(100, Math.round((v / HOURS_MAX[part]) * 100)));
+  return `<td class="hours h-${cls}"><span>${hhmm(v)}</span><i style="--p:${pct}%"></i></td>`;
+}
+
+function renderDrivers() {
+  const q = $("drvSearch").value.trim().toLowerCase();
+  const comp = $("drvCompany").value;
+  const companies = [...new Set(S.drivers.map((d) => d.company))];
+  const sel = $("drvCompany");
+  if (sel.options.length - 1 !== companies.length) {
+    sel.innerHTML = `<option value="">All companies</option>` + companies.map((c) => `<option>${esc(c)}</option>`).join("");
+    sel.value = comp;
+  }
+  const tgReady = S.status.tg_state === "ready";  // Telegram ulanmagan bo'lsa guruh topilmagani bilinmaydi
+  const base = S.drivers.filter((d) =>
+    (!q || d.name.toLowerCase().includes(q) || (d.truck || "").toLowerCase().includes(q)) && (!comp || d.company === comp));
+  const F = {
+    duty: (d) => ["DR", "ON", "YM"].includes(d.status),
+    problems: (d) => d.problems.length > 0,
+    nogroup: (d) => tgReady && d.truck && !d.group,
+    all: () => true,
+  };
+  setSegCounts("drvSeg", "dfilter", Object.fromEntries(Object.entries(F).map(([k, f]) => [k, base.filter(f).length])));
+  const rows = base.filter(F[drvFilter]);
+  rows.sort((a, b) => b.problems.length - a.problems.length || (b.minutes_ago ?? 1e9) - (a.minutes_ago ?? 1e9));
+  if (!rows.length) {
+    $("driversBody").innerHTML = `<tr><td colspan="10" class="empty">${S.drivers.length ? "No matching drivers" : "Not checked yet"}</td></tr>`;
+    return;
+  }
+  $("driversBody").innerHTML = rows.map((d) => {
+    const probs = d.problems.map((p) => tag((KIND[p] || [p])[0], (KIND[p] || [0, "t-gray"])[1])).join("")
+      + (tgReady && d.truck && !d.group ? `<span class="tag t-gray" title="No Telegram group named 'Unit# ${esc(d.truck)} …' was found">No group</span>` : "");
+    return `<tr${d.problems.length ? ' class="row-issue"' : ""}>
+    <td class="nowrap"><b>${esc(d.truck) || '<span class="muted">—</span>'}</b></td>
+    <td class="drv-cell"><b class="drv-link" data-drv="${esc(d.name)}" data-unit="${esc(d.truck || "")}">${esc(d.name)}</b><div class="muted loc" title="${esc(d.location)}">${esc(d.company)}${d.location ? " · " + esc(d.location) : ""}</div></td>
+    <td><span class="st st-${esc(d.status)}">${esc(d.status)}</span></td>
+    <td>${connCell(d)}</td>
+    ${hoursCell(d, "break")}${hoursCell(d, "drive")}${hoursCell(d, "shift")}${hoursCell(d, "cycle")}
+    <td>${probs || '<span class="muted">—</span>'}</td>
+    <td>${linkBtns(d.truck, d.company_id ? `${d.company_id}|${d.driver_id}|driver` : "", d.name)}</td></tr>`;
+  }).join("");
+}
+
+const violDrivers = () => new Set(S.violations.filter((v) => IMPORTANT.has(v.kind)).map((v) => `${v.unit}|${v.name}`)).size;
+
+function renderViolations() {
+  const q = $("violSearch").value.trim().toLowerCase();
+  const nImp = violDrivers();
+  $("cViol").textContent = nImp;
+  $("cViol").classList.toggle("hidden", !nImp);
+  const base = S.violations.filter((v) => !q || (v.name || "").toLowerCase().includes(q) || (v.unit || "").toLowerCase().includes(q));
+  const pick = (v) => violFilter === "all" || IMPORTANT.has(v.kind);
+  // Driver bo'yicha guruhlash: bitta driver — bitta qator
+  const groups = (list) => {
+    const m = new Map();
+    for (const v of list) {
+      const id = `${v.unit}|${v.name}`;
+      if (!m.has(id)) m.set(id, { v, items: [] });
+      m.get(id).items.push(v);
+    }
+    return [...m.values()];
+  };
+  const base8 = (S.violations_8d || []).filter((v) => !q || (v.name || "").toLowerCase().includes(q) || (v.unit || "").toLowerCase().includes(q));
+  setSegCounts("violSeg", "vfilter", { red: groups(base.filter((v) => IMPORTANT.has(v.kind))).length, all: groups(base).length,
+    days8: groups(base8).length });
+  $("violWhenTh").textContent = violFilter === "days8" ? "Days" : "Started";
+  if (violFilter === "days8") return renderViol8(groups(base8));
+  const rank = (v) => ({ violation: 0, error: 1, warning: 2, regular: 3 }[v.kind] ?? 4);
+  const rows = groups(base.filter(pick));
+  rows.forEach((g) => { g.items.sort((a, b) => rank(a) - rank(b)); g.rank = rank(g.items[0]); });
+  rows.sort((a, b) => a.rank - b.rank);
+  if (!rows.length) {
+    $("violBody").innerHTML = `<tr><td colspan="6" class="empty">${violFilter === "red" ? ic("check") + "No red violations / errors" : "Nothing here"}</td></tr>`;
+    return;
+  }
+  $("violBody").innerHTML = rows.map((g) => {
+    const v = g.v;
+    const tags = g.items.flatMap((x) => {
+      const [label, cls] = VKIND[x.kind] || [x.level, "t-gray"];
+      return x.types.map((t) => `<span class="tag ${cls}" title="${esc(label)}${x.start ? " · started " + esc(x.start) : ""}">${esc(t)}</span>`);
+    }).join("");
+    const start = g.items.map((x) => x.start).filter(Boolean)[0] || "";
+    return `<tr${g.rank < 2 ? ' class="row-issue"' : ""}>
+    <td class="nowrap"><b>${esc(v.unit) || '<span class="muted">—</span>'}</b></td>
+    <td class="drv-cell"><b class="drv-link" data-drv="${esc(v.name)}" data-unit="${esc(v.unit || "")}">${esc(v.name)}</b><div class="muted">${esc(v.company)}</div></td>
+    <td><span class="st st-${esc(v.status)}">${esc(v.status)}</span></td>
+    <td>${tags}</td>
+    <td class="nowrap muted">${esc(start)}</td>
+    <td>${linkBtns(v.unit, "", v.name)}</td></tr>`;
+  }).join("");
+}
+
+// Oxirgi 8 kun: driver bo'yicha bitta qator, har bir violation turi — qaysi kunlarda bo'lgani bilan
+function renderViol8(rows) {
+  if (!rows.length) {
+    $("violBody").innerHTML = `<tr><td colspan="6" class="empty">${ic("check")}No red violations / errors in the last 8 days</td></tr>`;
+    return;
+  }
+  const short = (day) => (day || "").replace(/,\s*\d{4}$/, "");  // "Oct 24, 2026" -> "Oct 24"
+  const latest = (g) => Math.max(...g.items.map((x) => Date.parse(x.day) || 0));
+  rows.sort((a, b) => latest(b) - latest(a));
+  $("violBody").innerHTML = rows.map((g) => {
+    const v = g.v;
+    const byType = new Map();
+    for (const x of g.items) {
+      for (const t of x.types) {
+        const k = `${x.kind}|${t}`;
+        if (!byType.has(k)) byType.set(k, { x, t, days: new Set() });
+        byType.get(k).days.add(short(x.day));
+      }
+    }
+    const tags = [...byType.values()].map(({ x, t, days }) => {
+      const [label, cls] = VKIND[x.kind] || [x.level, "t-gray"];
+      return `<span class="tag ${cls}" title="${esc(label)} · ${esc([...days].join(", "))}">${esc(t)}</span>`;
+    }).join("");
+    // Har bir kun — tugma: bosilsa FiveELD da o'sha sanadagi log ochiladi (yangisi birinchi)
+    const key = `${v.company_id}|${v.driver_id}|viol8`;
+    const dayBtns = [...new Set(g.items.map((x) => x.day))].map((day) =>
+      `<button class="day-chip" data-open="log" data-unit="${esc(v.unit)}" data-key="${esc(key)}" data-name="${esc(v.name)}"
+        data-day="${esc(day)}" title="Open the ${esc(day)} log in FiveELD">${esc(short(day))}</button>`).join("");
+    return `<tr class="row-issue">
+    <td class="nowrap"><b>${esc(v.unit) || '<span class="muted">—</span>'}</b></td>
+    <td class="drv-cell"><b class="drv-link" data-drv="${esc(v.name)}" data-unit="${esc(v.unit || "")}">${esc(v.name)}</b><div class="muted">${esc(v.company)}</div></td>
+    <td>${v.status ? `<span class="st st-${esc(v.status)}">${esc(v.status)}</span>` : ""}</td>
+    <td>${tags}</td>
+    <td><div class="day-chips">${dayBtns}</div></td>
+    <td>${linkBtns(v.unit, "", v.name)}</td></tr>`;
+  }).join("");
+}
+
+// ELD changes: dastur FiveELD da qilgan o'zgarishlar (Test — qilardi), "Checked" belgisi bilan
+let chgFilter = "todo";
+function renderChanges() {
+  const all = S.eld_changes || [];
+  const todo = all.filter((c) => !c.test && !c.checked).length;
+  $("cChanges").textContent = todo;
+  $("cChanges").classList.toggle("hidden", !todo);
+  const q = $("chgSearch").value.trim().toLowerCase();
+  const base = all.filter((c) => !q || (c.name || "").toLowerCase().includes(q) || (c.unit || "").toLowerCase().includes(q));
+  const F = { todo: (c) => !c.test && !c.checked, live: (c) => !c.test, test: (c) => c.test };
+  setSegCounts("chgSeg", "cfilter", { todo: base.filter(F.todo).length, live: base.filter(F.live).length,
+    test: base.filter(F.test).length });
+  const rows = base.filter(F[chgFilter]);
+  if (!rows.length) {
+    const msg = { todo: "Nothing to check — all changes are checked", live: "The app has not changed anything in FiveELD yet",
+      test: "No test results yet" }[chgFilter];
+    $("chgBody").innerHTML = `<tr><td colspan="7" class="empty">${chgFilter === "todo" ? ic("check") : ""}${msg}</td></tr>`;
+    return;
+  }
+  $("chgBody").innerHTML = rows.map((c) => {
+    const when = new Date(c.ts * 1000).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    const where = c.place ? `${esc(c.place)} <span class="muted">(${esc(c.place_kind)})</span>` : esc(c.place_kind || "");
+    const key = `${c.company_id}|${c.driver_id}|change`;
+    const logBtn = `<button class="day-chip" data-open="log" data-unit="${esc(c.unit)}" data-key="${esc(key)}" data-name="${esc(c.name)}"
+      data-day="${esc(c.day)}" title="Open the ${esc(c.day)} log in FiveELD">${ic("file")} Open log</button>`;
+    return `<tr${!c.test && !c.checked ? ' class="row-issue"' : ""}>
+    <td class="nowrap">${esc(when)}</td>
+    <td class="nowrap"><b>${esc(c.unit)}</b></td>
+    <td class="drv-cell"><b class="drv-link" data-drv="${esc(c.name)}" data-unit="${esc(c.unit || "")}">${esc(c.name)}</b><div class="muted">${esc(c.company)}</div></td>
+    <td><b>${esc(c.change)}</b> <span class="muted">from ${esc(c.from_time)}</span>
+      <div class="muted">${c.kind === "fill" ? `${esc(c.events || "")} events` : `was ON for ${esc(c.on_for)}`}${c.test ? ' · <span class="tag t-gray">Test · not saved</span>' : ""}
+      ${c.offline ? ' · <span class="tag t-amber" title="Driver was offline — the tablet may send older logs when it reconnects">offline</span>' : ""}</div></td>
+    <td>${where}<div class="muted">${esc(c.location)}</div></td>
+    <td>${c.test ? '<span class="muted">—</span>' : `<label class="tick" title="${c.checked ? "Checked" : "Mark as checked"}"><input type="checkbox" data-chg="${esc(c.id)}" ${c.checked ? "checked" : ""}><span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></label>`}</td>
+    <td>${logBtn}</td></tr>`;
+  }).join("");
+}
+$("chgBody").addEventListener("change", async (e) => {
+  const box = e.target.closest("input[data-chg]");
+  if (!box) return;
+  try {
+    await api("/api/changes/check", { id: box.dataset.chg, checked: box.checked });
+    const c = (S.eld_changes || []).find((x) => x.id === box.dataset.chg);
+    if (c) c.checked = box.checked;
+    renderChanges();
+  } catch (ex) { box.checked = !box.checked; if (ex.message !== "locked") toast("❌ " + ex.message); }
+});
+$("chgSearch").addEventListener("input", () => S && renderChanges());
+
+// Away alerts boti: token (bir marta) -> odamlar Start bosadi
+function renderBot() {
+  const c = S.config;
+  const hasTok = !!c.bot_token_set, people = c.bot_people || [];
+  $("botToken").classList.toggle("hidden", hasTok);
+  $("btnBotSave").classList.toggle("hidden", hasTok);
+  $("btnBotConnect").classList.toggle("hidden", !hasTok);
+  $("btnAlertTest").classList.toggle("hidden", !hasTok);
+  $("btnCallTest").classList.toggle("hidden", !hasTok);
+  $("botStatus").innerHTML = !hasTok
+    ? "Paste the token from <b>@BotFather</b>"
+    : `${ic("check")} <b>@${esc(c.bot_username)}</b> · ${people.length ? people.map((p) => esc(p.name)).join(", ") : "nobody pressed Start yet"}`;
+}
+$("btnBotSave").addEventListener("click", async (e) => {
+  e.target.disabled = true;
+  try {
+    const r = await api("/api/bot/token", { token: $("botToken").value.trim() });
+    $("botToken").value = "";
+    Object.assign(S.config, { bot_token_set: true, bot_username: r.username, bot_chat_id: null, bot_chat_name: "",
+                              bot_people: [] });
+    renderBot();
+    toast(`Bot @${r.username} saved — now everyone presses Start in it`);
+  } catch (ex) { if (ex.message !== "locked") toast("❌ " + ex.message); }
+  e.target.disabled = false;
+});
+$("btnBotConnect").addEventListener("click", async (e) => {
+  e.target.disabled = true;
+  try {
+    const r = await fetch("/api/bot/people", { headers: { "X-Requested-With": "eld" } }).then((x) => x.json());
+    if (!r.ok) throw new Error(r.error || "Could not read the bot");
+    S.config.bot_people = r.people;
+    renderBot();
+    toast(r.people.length ? `${r.people.length} people pressed Start` : "Nobody has pressed Start yet");
+  } catch (ex) { if (ex.message !== "locked") toast("❌ " + ex.message); }
+  e.target.disabled = false;
+});
+$("btnCallTest").addEventListener("click", async (e) => {
+  e.target.disabled = true;
+  toast("📞 Calling… (about 20 seconds)");
+  try { const r = await api("/api/bot/test-call", {}); toast(`📞 Test call — ${r.result}`); }
+  catch (ex) { if (ex.message !== "locked") toast("❌ " + ex.message); }
+  e.target.disabled = false;
+});
+$("btnAlertTest").addEventListener("click", async (e) => {
+  e.target.disabled = true;
+  try { const r = await api("/api/telegram/alert-test", {}); toast(`Test message sent to “${r.title}”`); }
+  catch (ex) { if (ex.message !== "locked") toast("❌ " + ex.message); }
+  e.target.disabled = false;
+});
+
+// ---------------------------------------------------------------- driver kartasi (o'ng panel)
+const normName = (n) => (n || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+let drvOpen = null;  // {name, unit} — ochiq panel (har yangilanishda qayta chiziladi)
+
+function openDriver(name, unit) {
+  drvOpen = { name, unit };
+  renderDriverPanel();
+  $("drvDrawer").classList.remove("hidden");
+  document.body.classList.add("drawer-open");
+}
+function closeDriver() {
+  drvOpen = null;
+  $("drvDrawer").classList.add("hidden");
+  document.body.classList.remove("drawer-open");
+}
+
+function renderDriverPanel() {
+  if (!drvOpen || !S) return;
+  const key = normName(drvOpen.name);
+  const d = S.drivers.find((x) => normName(x.name) === key)
+    || (drvOpen.unit && S.drivers.find((x) => x.truck === drvOpen.unit)) || null;
+  const name = d ? d.name : drvOpen.name, unit = d ? d.truck : drvOpen.unit || "";
+  const same = (n, u) => normName(n) === normName(name) || (unit && u === unit);
+  const sec = (title, body, extra = "") => `<section class="dp-sec"><h3>${title}${extra}</h3>${body}</section>`;
+  const none = (t) => `<div class="muted dp-none">${t}</div>`;
+
+  // Soatlar
+  const bar = (part, label) => {
+    const v = d && d.left ? d.left[part] : null;
+    if (v === null || v === undefined) return `<div class="dp-hr"><span>${label}</span><b class="muted">—</b><i></i></div>`;
+    const lim = (S.config.low_time_minutes || LOW_WARN)[part] || 0, active = ["DR", "ON"].includes(d.status);
+    const cls = active && v <= lim ? "bad" : active && v <= lim * 2 ? "warn" : "ok";
+    const pct = Math.max(3, Math.min(100, Math.round((v / HOURS_MAX[part]) * 100)));
+    return `<div class="dp-hr h-${cls}"><span>${label}</span><b>${hhmm(v)}</b><i style="--p:${pct}%"></i></div>`;
+  };
+  const hours = d ? `<div class="dp-hours">${bar("break", "Break")}${bar("drive", "Drive")}${bar("shift", "Shift")}${bar("cycle", "Cycle")}</div>`
+                  : none("Not in the current FiveELD list (inactive or not checked yet)");
+
+  // Hozirgi muammolar
+  const iss = S.issues.filter((i) => same(i.name, i.unit));
+  const issues = iss.length ? iss.map((i) => {
+    const [label, cls] = KIND[i.type] || [i.type, "t-gray"];
+    return `<div class="dp-row"><span class="tag ${cls}">${esc(label)}</span><span class="muted">${esc(i.detail || "")}</span>
+      <span class="dp-when">${short(S.now - (i.since || i.first))}</span></div>`;
+  }).join("") : none("No open problems");
+
+  // Trailer (oxirgi guruh update'i)
+  const tc = (S.trailer_checks || []).filter((c) => same(c.name, c.unit)).sort((a, b) => b.msg_ts - a.msg_ts)[0];
+  const TS = { ok: ["Updated", "t-green"], waiting: ["Waiting", "t-amber"], mismatch: ["Not updated", "t-red"],
+               at_facility: ["At facility", "t-gray"], review: ["Check photos", "t-amber"] };
+  const trailer = tc ? `<div class="dp-trl">
+      <div>${(tc.lines || []).map((l) => `<div><b>${esc(l)}</b></div>`).join("") || "—"}</div>
+      <div class="muted">ELD: ${esc((tc.eld || []).join(", ") || "—")} · Doc: ${esc((tc.eld_docs || []).join(", ") || "—")}</div>
+      <div class="dp-row"><span class="tag ${(TS[tc.status] || ["", "t-gray"])[1]}">${esc((TS[tc.status] || [tc.status])[0])}</span>
+        <span class="dp-when">${ago(tc.msg_ts)}</span></div></div>` : none("No trailer update in the last hours");
+
+  // Violations: bugun (qizil) + 8 kun
+  const vToday = S.violations.filter((v) => same(v.name, v.unit) && IMPORTANT.has(v.kind));
+  const v8 = (S.violations_8d || []).filter((v) => same(v.name, v.unit));
+  const types = new Map();
+  for (const v of v8) for (const t of v.types) {
+    if (!types.has(t)) types.set(t, { kind: v.kind, days: new Set() });
+    types.get(t).days.add((v.day || "").replace(/,\s*\d{4}$/, ""));
+  }
+  const viol = (vToday.length || types.size) ? [
+    ...vToday.flatMap((v) => v.types.map((t) => `<div class="dp-row"><span class="tag t-red">today</span><span>${esc(t)}</span></div>`)),
+    ...[...types.entries()].map(([t, x]) => `<div class="dp-row"><span class="tag ${(VKIND[x.kind] || ["", "t-red"])[1]}">${x.days.size}d</span>
+      <span>${esc(t)}</span><span class="dp-when" title="${esc([...x.days].join(", "))}">${esc([...x.days][0] || "")}</span></div>`),
+  ].join("") : none("No red violations in the last 8 days");
+
+  // ELD changes
+  const ch = (S.eld_changes || []).filter((c) => !c.test && same(c.name, c.unit)).slice(0, 5);
+  const changes = ch.length ? ch.map((c) => `<div class="dp-row"><b>${esc(c.change)}</b><span class="muted">from ${esc(c.from_time)} ·
+      ${esc(c.place || c.place_kind || "")}</span><span class="dp-when">${ago(c.ts)}</span></div>`).join("") : none("Nothing changed by the app");
+
+  // Oxirgi xabarlar (shu unit)
+  const hist = unit ? S.history.filter((h) => h.unit === unit).slice(0, 8) : [];
+  const history = hist.length ? hist.map((h) => {
+    const [kl, kc] = HIST_KIND[h.kind] || [h.kind, "t-gray"];
+    return `<div class="dp-row dp-hist"><span class="dp-when">${clock(h.ts)}</span><span class="tag ${kc}">${emo(kl)}</span>
+      <span class="dp-text" title="${esc(stripEmo(h.text || ""))}">${esc(stripEmo(h.text || ""))}</span></div>`;
+  }).join("") : none("No recent messages");
+
+  const st = d ? `<span class="st st-${esc(d.status)}">${esc(d.status)}</span>` : "";
+  $("drvDrawerBody").innerHTML = `
+    <div class="dp-head">
+      <div class="dp-unit">${esc(unit) || "—"}</div>
+      <div class="dp-who"><h2>${esc(name)}</h2>
+        <div class="muted">${esc(d ? d.company : "")}</div>
+        <div class="dp-state">${st}${d ? connCell(d) : ""}<span class="muted">${d && d.last_seen ? "seen " + esc(d.last_seen) : ""}</span></div>
+        ${d && d.location ? `<div class="muted dp-loc">${ic("truck")}${esc(d.location)}</div>` : ""}
+      </div>
+    </div>
+    <div class="dp-links">${unit ? linkBtns(unit, d && d.company_id ? `${d.company_id}|${d.driver_id}|driver` : "", name) : ""}</div>
+    ${sec("Hours left", hours)}
+    ${sec("Open problems", issues, iss.length ? ` <span class="soft-count">${iss.length}</span>` : "")}
+    ${sec("Trailer", trailer)}
+    ${sec("Violations", viol)}
+    ${sec("Changed by the app", changes)}
+    ${sec("Recent messages", history)}`;
+}
+
+// Ism bosilsa — driver kartasi (Drivers, Overview, Trailer checks, Violations, ELD changes)
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-drv]");
+  if (t) { openDriver(t.dataset.drv, t.dataset.unit || ""); return; }
+  if (e.target.closest("[data-drv-close]") || e.target.id === "drvDrawer") closeDriver();
+});
+// Esc — panelni yopadi (ustida boshqa oyna ochiq bo'lmasa: masalan Shift report yoki tasdiqlash)
+addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && drvOpen && ![...document.querySelectorAll(".modal")].some((m) => m.offsetParent !== null)) closeDriver();
+});
+
+function renderHistory() {
+  const q = $("histSearch").value.trim().toLowerCase();
+  const F = {
+    all: () => true,
+    driver: (h) => h.kind === "driver",
+    // Menga kelgan / men uchun bo'lgan hammasi: eskalatsiya, tag, shaxsiy xabar, FiveELD kanal, Away, qo'ng'iroq
+    me: (h) => ["escalation", "violation", "mention", "dm", "feed", "away_issue", "call", "ack", "system"].includes(h.kind),
+    group: (h) => h.kind === "trailer_msg",
+    resolved: (h) => h.kind === "resolved",
+    failed: (h) => ["no_group", "offline"].includes(h.result),
+  };
+  const base = S.history.filter((h) => !q || (h.unit || "").toLowerCase().includes(q) || (h.text || "").toLowerCase().includes(q)
+    || (h.group || "").toLowerCase().includes(q));
+  setSegCounts("histSeg", "hfilter", Object.fromEntries(Object.entries(F).map(([k, f]) => [k, base.filter(f).length || ""])));
+  const rows = base.filter(F[histFilter]);
+  if (!rows.length) {
+    $("histBody").innerHTML = `<div class="empty">${S.history.length ? "No matching messages" : "No messages yet"}</div>`;
+    return;
+  }
+  let lastDay = "";
+  $("histBody").innerHTML = rows.map((h) => {
+    const [kl, kc] = HIST_KIND[h.kind] || [h.kind, "t-gray"];
+    const [rl, rc] = RESULT[h.result] || [h.result, "t-gray"];
+    const id = `${h.ts}|${h.unit}`;
+    const text = stripEmo(h.text || "");  // boshidagi emoji — yonidagi yorliqda belgi bor
+    const long = text.length > 140 || text.includes("\n");
+    const open = histOpen.has(id);
+    const day = new Date(h.ts * 1000).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+    const sep = day !== lastDay ? `<div class="hist-day">${day}</div>` : "";
+    lastDay = day;
+    return `${sep}<div class="hist-row${h.result === "no_group" ? " row-issue" : ""}">
+      <span class="hist-time">${clock(h.ts)}</span>
+      <span class="hist-kind">${tag(kl, kc)}</span>
+      <span class="hist-to">${h.unit ? `<b>${esc(h.unit)}</b>` : '<span class="muted">—</span>'}${h.group ? `<span class="muted" title="${esc(h.group)}">${esc(h.group)}</span>` : ""}</span>
+      <span class="hist-text${open ? " open" : ""}" ${long ? `data-hist="${esc(id)}" title="${open ? "Click to fold" : "Click to read all"}"` : ""}>${esc(text)}</span>
+      <span class="hist-res">${h.result ? tag(rl, rc) : ""}</span></div>`;
+  }).join("");
+}
+
+function renderTelegramPanel() {
+  const st = S.status.tg_state;
+  const show = { no_keys: "tgKeys", error: "tgKeys", need_phone: "tgPhone", need_qr: "tgQr", need_code: "tgCode", need_2fa: "tgPass", ready: "tgReady" }[st];
+  ["tgKeys", "tgPhone", "tgQr", "tgCode", "tgPass", "tgReady"].forEach((id) => $(id).classList.toggle("hidden", id !== show));
+  // QR rasmi faqat token yangilanganda qayta yuklanadi
+  const qrId = S.status.tg_qr_id;
+  if (st === "need_qr" && qrId && $("tgQrImg").dataset.id !== qrId) {
+    $("tgQrImg").dataset.id = qrId;
+    $("tgQrImg").src = `/api/telegram/qr.svg?v=${qrId}`;
+  }
+  $("tgCodeHint").textContent = S.status.tg_code_via
+    ? `Code for ${S.status.tg_phone} was sent ${S.status.tg_code_via}.`
+    : `Enter the login code for ${S.status.tg_phone || "your number"} (check the 'Telegram' chat in your Telegram app first, then SMS).`;
+  const who = [S.status.tg_username && "@" + S.status.tg_username, S.status.tg_phone_masked].filter(Boolean).join(" · ");
+  $("tgPanelState").textContent = st === "ready"
+    ? `Account: ${S.status.tg_me}${who ? ` (${who})` : ""} · ${S.status.tg_groups} Unit# groups found`
+    : S.config.telegram_keys_set ? "API keys saved. Sign in with your phone." : "Step 1: enter your API keys.";
+  // FiveELD akkaunti
+  const acc = S.status.eld_account, eldOk = S.status.eld_logged_in;
+  $("eldBadge").innerHTML = `<span class="dot ${eldOk ? "ok" : "bad"}"></span>${eldOk ? "Logged in" : "Login required"}`;
+  $("eldAccount").textContent = eldOk
+    ? (acc && (acc.name || acc.email) ? `Account: ${acc.name}${acc.email ? ` (${acc.email})` : ""}` : "Logged in")
+    : "Log in in the FiveELD browser window (click “Show browser window”)";
+  const ok = st === "ready";
+  $("tgBadge").innerHTML = `<span class="dot ${ok ? "ok" : "bad"}"></span>${ok ? "Connected" : "Not connected"}`;
+  const dry = S.status.dry_run;
+  $("modeHint").innerHTML = dry
+    ? ic("flask") + "<b>Test</b> — messages go to your own Saved Messages, drivers get nothing."
+    : ic("live") + "<b>Live</b> — messages really go to the drivers' Unit# groups.";
+  $("btnMode2").textContent = dry ? "Switch to live" : "Back to test";
+  $("btnMode2").className = dry ? "primary" : "";
+}
+
+// ---------------------------------------------------------------- ogohlantirish turlari (Settings → Alerts & messages)
+// Har bir tur: Telegramga yuborilsinmi, qachon, xabar matni — hammasi bitta qatorda
+const ALERTS = [
+  { kind: "offline", msg: "offline", title: "Internet off", desc: "Phone has no internet (grey antenna) in DR / ON / YM",
+    time: { cfg: "offline_after_minutes", label: "after", unit: "min" }, vars: ["name", "last_seen"] },
+  { kind: "disconnect", msg: "disconnected", title: "ELD disconnected", desc: "ELD device is not connected to the app",
+    time: { cfg: "eld_disconnect_after_minutes", label: "after", unit: "min" }, vars: ["name"] },
+  { kind: "trailer_change", msg: "trailer_change", title: "Trailer not updated in ELD", desc: "Group message says a new trailer / bobtail, ELD still shows the old one",
+    time: { cfg: "trailer_check_grace_minutes", label: "after", unit: "min" }, vars: ["name", "what", "todo"] },
+  { kind: "long_on", msg: "long_on", title: "Stuck in ON", desc: "On Duty for a long time without driving",
+    time: { cfg: "long_on_duty_minutes", label: "longer than", unit: "min" }, vars: ["name", "duration"] },
+  { kind: "shipping_doc", msg: "shipping_doc", title: "No BOL", desc: "No shipping document in the ELD", vars: ["name"] },
+  { kind: "trailer", msg: "trailer", title: "No trailer", desc: "No trailer number in the ELD", vars: ["name"] },
+  { kind: "low_break", msg: "low_break", title: "Low break time", desc: "Close to the 30-minute break (in DR)",
+    time: { low: "break", label: "when less than", unit: "min" }, vars: ["name", "left"] },
+  { kind: "low_drive", msg: "low_drive", title: "Low drive time", desc: "Little driving time left (in DR)",
+    time: { low: "drive", label: "when less than", unit: "min" }, vars: ["name", "left"] },
+  { kind: "low_shift", msg: "low_shift", title: "Low shift time", desc: "Little time left on the 14-hour shift",
+    time: { low: "shift", label: "when less than", unit: "min" }, vars: ["name", "left"] },
+  { kind: "low_cycle", msg: "low_cycle", title: "Low cycle time", desc: "Little time left on the 70-hour cycle",
+    time: { low: "cycle", label: "when less than", unit: "min" }, vars: ["name", "left"] },
+];
+const SAMPLE = { name: "John Smith", last_seen: "15 min ago", left: "25 min", duration: "1h 20m",
+                 what: "you picked up an EMPTY trailer TA 1549", todo: "set Trailer to TA 1549 and Document to Empty" };
+
+function buildAlertList() {
+  $("alertList").innerHTML = ALERTS.map((a) => {
+    const t = a.time;
+    const timing = !t ? `<span class="muted timing-none">right away</span>`
+      : `<span class="timing"><span class="muted">${t.label}</span><span class="num"><input type="number" min="0"
+          ${t.cfg ? `data-cfg="${t.cfg}"` : `data-low="${t.low}"`}><span>${t.unit}</span></span></span>`;
+    return `<div class="alert-row" data-kind="${a.kind}">
+      <div class="alert-main">
+        <input type="checkbox" class="switch" data-send="${a.kind}" title="Send to the driver's Telegram group">
+        <div class="alert-text"><b>${a.title}</b><div class="hint">${a.desc}</div></div>
+        ${timing}
+        <button class="link" data-edit="${a.msg}">${ic("edit")}Message</button>
+      </div>
+      <div class="alert-msg hidden" id="msgBox_${a.msg}">
+        <textarea data-msg="${a.msg}" rows="3"></textarea>
+        <div class="msg-tools">
+          <span class="muted">Insert:</span>${a.vars.map((v) => `<button class="var-chip" data-var="${v}" data-for="${a.msg}">{${v}}</button>`).join("")}
+          <button class="link reset-msg" data-reset="${a.msg}">${ic("undo")}Reset to default</button>
+        </div>
+        <div class="msg-preview"><span class="muted">Preview:</span> <span id="prev_${a.msg}"></span></div>
+      </div></div>`;
+  }).join("");
+}
+buildAlertList();
+
+function renderPreview(key) {
+  const el = document.querySelector(`[data-msg="${key}"]`);
+  $(`prev_${key}`).textContent = el.value.replace(/\{(\w+)\}/g, (m, v) => SAMPLE[v] ?? m);
+}
+$("alertList").addEventListener("click", (e) => {
+  const ed = e.target.closest("[data-edit]"), vr = e.target.closest("[data-var]"), rs = e.target.closest("[data-reset]");
+  if (ed) {
+    const box = $(`msgBox_${ed.dataset.edit}`);
+    box.classList.toggle("hidden");
+    ed.classList.toggle("on", !box.classList.contains("hidden"));
+    renderPreview(ed.dataset.edit);
+  } else if (vr) {  // o'zgaruvchini kursor turgan joyga qo'yish
+    const ta = document.querySelector(`[data-msg="${vr.dataset.for}"]`);
+    const s = ta.selectionStart ?? ta.value.length, en = ta.selectionEnd ?? s, ins = `{${vr.dataset.var}}`;
+    ta.value = ta.value.slice(0, s) + ins + ta.value.slice(en);
+    ta.focus(); ta.selectionStart = ta.selectionEnd = s + ins.length;
+    renderPreview(vr.dataset.for); updateDirty();
+  } else if (rs) {
+    const def = (S.config.default_messages || {})[rs.dataset.reset];
+    if (def) { document.querySelector(`[data-msg="${rs.dataset.reset}"]`).value = def; renderPreview(rs.dataset.reset); updateDirty(); }
+  }
+});
+
+// Kompaniyalar ro'yxati (FiveELD'dan o'qilgan) — har biri yoqish/o'chirish tugmasi bilan
+function renderCompanies(cfg) {
+  const on = new Set(Object.values(cfg.companies || {}));
+  // Tekshirilayotganlari ro'yxatda albatta bo'lsin (nomi bo'yicha emas, id bo'yicha birlashtiriladi)
+  const known = { ...(cfg.companies_known || {}) };
+  for (const [name, id] of Object.entries(cfg.companies || {})) {
+    if (!Object.values(known).includes(id)) known[name] = id;
+  }
+  const all = Object.entries(known).sort((a, b) => on.has(b[1]) - on.has(a[1]) || a[0].localeCompare(b[0]));
+  $("companyList").innerHTML = all.map(([name, id]) => `<div class="set-row company-row">
+      <div><b>${esc(name)}</b></div>
+      <input type="checkbox" class="switch" data-company="${esc(id)}"${on.has(id) ? " checked" : ""} title="Check this company">
+    </div>`).join("") || `<div class="hint">No companies yet — they are read from FiveELD on the first check.</div>`;
+}
+
+function loadSettings(cfg) {
+  renderCompanies(cfg);
+  document.querySelectorAll("[data-cfg]").forEach((el) => { el.value = cfg[el.dataset.cfg]; });
+  document.querySelectorAll("[data-msg]").forEach((el) => { el.value = cfg.messages[el.dataset.msg] || ""; });
+  document.querySelectorAll("[data-low]").forEach((el) => { el.value = (cfg.low_time_minutes || {})[el.dataset.low] ?? 0; });
+  document.querySelectorAll("[data-send]").forEach((el) => { el.checked = (cfg.send_kinds || []).includes(el.dataset.send); });
+  $("notifyViol").checked = !!cfg.notify_violations;
+  renderBot();
+  $("autoSleeper").value = ["test", "live"].includes(cfg.auto_sleeper) ? cfg.auto_sleeper : "off";
+  $("autoFill").value = ["test", "live"].includes(cfg.auto_fill) ? cfg.auto_fill : "off";
+  if (cfg.telegram_api_id) $("tgApiId").value = cfg.telegram_api_id;
+  ALERTS.forEach((a) => renderPreview(a.msg));
+  settingsLoaded = true;
+  savedSnapshot = JSON.stringify(collectSettings());
+  updateDirty();
+}
+
+// ---------------------------------------------------------------- amallar
+async function refresh(poll = true) {
+  try {
+    S = await api("/api/state", undefined, poll);
+    render();
+  } catch (e) { /* 401 bo'lsa login sahifasiga o'tadi */ }
+}
+
+function guard(btn, fn) {
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    try { await fn(); } catch (e) { if (e.message !== "locked") toast("❌ " + e.message); }
+    finally { btn.disabled = false; }
+  });
+}
+
+guard($("btnCheck"), async () => { await api("/api/check-now", {}); toast("Check started"); setTimeout(refresh, 1500); });
+guard($("btnPause"), async () => { await api("/api/pause", { paused: !S.status.paused }); await refresh(false); });
+guard($("btnShowEld"), async () => { await api("/api/fiveeld/show", {}); toast("FiveELD window brought to front"); });
+guard($("btnLock"), async () => { await api("/api/logout", {}); toast("Demo: the dashboard would lock here"); });
+async function toggleMode() {
+  const goLive = S.status.dry_run;
+  if (goLive && !(await ask({ title: "Switch to live mode?", icon: "live", ok: "Switch to live",
+      text: "Messages will really be sent to the drivers' Telegram groups." }))) return;
+  await api("/api/mode", { dry_run: !goLive });
+  toast(goLive ? "🟢 Live mode on" : "🧪 Test mode on");
+  await refresh(false);
+}
+guard($("btnMode"), toggleMode);
+// Away yoqilganda: kim chiqyapti? — botga Start bosganlar ro'yxatidan tanlanadi (alertlar faqat unga)
+function pickPerson() {
+  return new Promise((resolve) => {
+    const wrap = document.createElement("div");
+    wrap.className = "modal ask";
+    wrap.innerHTML = `<div class="modal-card ask-card" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+        <div class="ask-icon">${ic("bell")}</div>
+        <h2 id="pickTitle">Who is leaving?</h2>
+        <p class="ask-text">Tags and replies will be sent by the bot only to this person.</p>
+        <div class="pick-list" id="pickList"><div class="muted">Loading…</div></div>
+        <div class="ask-btns">
+          <button data-a="cancel">Cancel</button>
+          <button data-a="refresh" title="Someone just pressed Start in the bot">${ic("refresh")}Refresh</button>
+          <button data-a="ok" class="primary" disabled>Turn on</button>
+        </div></div>`;
+    const done = (v) => { removeEventListener("keydown", onKey, true); wrap.remove(); resolve(v); };
+    const onKey = (e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); done(null); } };
+    const okBtn = wrap.querySelector('[data-a="ok"]');
+    const load = async () => {
+      const list = wrap.querySelector("#pickList");
+      list.innerHTML = '<div class="muted">Loading…</div>';
+      try {
+        const r = await fetch("/api/bot/people", { headers: { "X-Requested-With": "eld" } }).then((x) => x.json());
+        if (!r.ok) throw new Error(r.error || "Could not read the bot");
+        const hint = `Not in the list? Open <b>@${esc(r.bot)}</b> in Telegram, press <b>Start</b>, then Refresh.`;
+        list.innerHTML = r.people.length
+          ? r.people.map((p) => `<label class="pick-row"><input type="radio" name="pickP" value="${esc(String(p.id))}"
+              ${String(p.id) === String(r.current) ? "checked" : ""}><span><b>${esc(p.name)}</b>
+              ${p.username ? `<span class="muted">@${esc(p.username)}</span>` : ""}</span></label>`).join("")
+            + `<div class="muted pick-hint">${hint}</div>`
+          : `<div class="muted">Nobody has pressed Start yet. ${hint}</div>`;
+        okBtn.disabled = !list.querySelector("input:checked");
+      } catch (ex) { list.innerHTML = `<div class="err">${esc(ex.message)}</div>`; }
+    };
+    wrap.addEventListener("change", () => { okBtn.disabled = !wrap.querySelector("input[name=pickP]:checked"); });
+    wrap.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-a]");
+      if (!b) { if (e.target === wrap) done(null); return; }
+      if (b.dataset.a === "cancel") done(null);
+      if (b.dataset.a === "refresh") load();
+      if (b.dataset.a === "ok") done(wrap.querySelector("input[name=pickP]:checked")?.value || null);
+    });
+    addEventListener("keydown", onKey, true);
+    document.body.appendChild(wrap);
+    load();
+  });
+}
+
+$("btnAway").addEventListener("click", async () => {
+  try {
+    const turnOn = !S.config.away_alerts;
+    let person = null;
+    if (turnOn && S.config.bot_token_set) {
+      person = await pickPerson();
+      if (!person) return;
+    }
+    const r = await api("/api/away", { on: turnOn, person });
+    S.config.away_alerts = r.on;
+    toast(r.on ? `Away alerts on — tags and replies go to “${r.to}”` : "Away alerts off");
+    render();
+  } catch (ex) { if (ex.message !== "locked") toast("❌ " + ex.message); }
+});
+guard($("btnMode2"), toggleMode);
+
+guard($("chipTg"), async () => showTab("settings"));
+
+guard($("btnExport"), async () => {
+  $("exportHint").innerHTML = emo("⏳ Reading groups… this can take a minute or two");
+  try {
+    const r = await api("/api/export/messages", { hours: Number($("exportHours").value) });
+    $("exportHint").innerHTML = emo(`✅ ${r.messages} messages from ${r.groups} groups saved: ${r.txt}`);
+    toast("✅ Export ready");
+  } catch (ex) { $("exportHint").innerHTML = emo("❌ " + ex.message); throw ex; }
+});
+guard($("btnEldShow"), async () => { await api("/api/fiveeld/show", {}); toast("FiveELD window brought to front"); });
+guard($("btnEldSwitch"), async () => {
+  if (!(await ask({ title: "Switch FiveELD account?", icon: "swap", ok: "Log out",
+      text: "The FiveELD window will show the login page — log in there yourself (with the reCAPTCHA). " +
+            "Checks wait until you log in. Then choose the companies in Settings → Checks & reminders." }))) return;
+  await api("/api/fiveeld/switch", {});
+  toast("Logged out — log in with the other account in the FiveELD window");
+  settingsLoaded = false;
+  await refresh(false);
+});
+
+guard($("btnCompRefresh"), async () => {
+  if (updateDirty()) { toast("Save or discard your changes first"); return; }
+  toast("Reading companies from FiveELD…");
+  const r = await api("/api/companies/refresh", {});
+  toast(`✅ ${r.found} companies found in FiveELD`);
+  settingsLoaded = false;
+  await refresh(false);
+});
+
+// ---------------------------------------------------------------- tasdiqlash oynasi (brauzerning confirm() o'rniga)
+// await ask({title, text, ok, icon, danger}) -> true / false. Esc / fon ustiga bosish — bekor, Enter — tasdiq
+function ask({ title, text = "", ok = "OK", cancel = "Cancel", icon = "alert", danger = false }) {
+  return new Promise((resolve) => {
+    const wrap = document.createElement("div");
+    wrap.className = "modal ask";
+    wrap.innerHTML = `<div class="modal-card ask-card" role="alertdialog" aria-modal="true" aria-labelledby="askTitle">
+        <div class="ask-icon ${danger ? "danger" : ""}">${ic(icon)}</div>
+        <h2 id="askTitle">${esc(title)}</h2>
+        ${text ? `<p class="ask-text">${esc(text).replace(/\n/g, "<br>")}</p>` : ""}
+        <div class="ask-btns">
+          <button data-a="0">${esc(cancel)}</button>
+          <button data-a="1" class="${danger ? "danger-fill" : "primary"}">${esc(ok)}</button>
+        </div></div>`;
+    const done = (v) => { removeEventListener("keydown", onKey, true); wrap.remove(); resolve(v); };
+    const onKey = (e) => {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); done(false); }
+      if (e.key === "Enter") { e.preventDefault(); done(true); }
+    };
+    wrap.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-a]");
+      if (b) done(b.dataset.a === "1");
+      else if (e.target === wrap) done(false);
+    });
+    addEventListener("keydown", onKey, true);
+    document.body.appendChild(wrap);
+    wrap.querySelector('[data-a="1"]').focus();
+  });
+}
+
+// ---------------------------------------------------------------- dasturni qayta ishga tushirish / to'xtatish
+function showOverlay(html) {
+  let o = $("appOverlay");
+  if (!o) {
+    o = document.createElement("div");
+    o.id = "appOverlay";
+    o.className = "modal";
+    document.body.appendChild(o);
+  }
+  o.innerHTML = `<div class="modal-card" style="padding:28px;text-align:center;max-width:420px">${html}</div>`;
+}
+guard($("btnRestart"), async () => {
+  if (!(await ask({ title: "Restart the program?", icon: "refresh", ok: "Restart",
+      text: "The FiveELD window closes and opens again. It takes about 20–40 seconds." }))) return;
+  await api("/api/app/restart", {});
+  showOverlay(`<h2 style="margin:0 0 8px">${ic("refresh")}Restarting…</h2><div class="muted">The page reloads by itself when the program is back.</div>`);
+  // Dastur qaytguncha kutamiz, keyin sahifani yangilaymiz
+  await new Promise((r) => setTimeout(r, 4000));
+  for (let i = 0; i < 90; i++) {
+    try {
+      const r = await fetch("/api/state", { headers: { "X-Requested-With": "eld", "X-Poll": "1" } });
+      if (r.status === 200 || r.status === 401) { location.reload(); return; }
+    } catch (e) { /* hali ochilmagan */ }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  showOverlay(`<h2 style="margin:0 0 8px">${ic("alert")}The program did not come back</h2>
+    <div class="muted">Open it again from the Start menu: search "ELD Monitor". Details: data\\logs\\eld_monitor.log</div>`);
+});
+guard($("btnQuit"), async () => {
+  if (!(await ask({ title: "Stop the program?", icon: "stop", ok: "Quit", danger: true,
+      text: "Checks and Telegram reminders stop until you open it again." }))) return;
+  await api("/api/app/quit", {});
+  showOverlay(`<h2 style="margin:0 0 8px">${ic("stop")}Program stopped</h2>
+    <div class="muted">Open it again from the Start menu: search "ELD Monitor". You can close this tab.</div>`);
+});
+
+// ---------------------------------------------------------------- parol qulfi (yoqish / o'chirish)
+$("optLock").addEventListener("change", async (e) => {
+  $("lockErr").textContent = "";
+  if (!e.target.checked) {  // o'chirish — avval parolni so'raymiz
+    $("lockConfirm").classList.remove("hidden");
+    $("lockPw").value = "";
+    $("lockPw").focus();
+    return;
+  }
+  try {
+    const r = await api("/api/lock", { enabled: true });
+    
+    toast("🔒 Lock turned on");
+    await refresh(false);
+  } catch (ex) { if (ex.message !== "locked") toast("❌ " + ex.message); }
+});
+guard($("btnLockOff"), async () => {
+  try {
+    await api("/api/lock", { enabled: false, password: $("lockPw").value });
+  } catch (ex) { $("lockErr").textContent = ex.message; return; }
+  $("lockConfirm").classList.add("hidden");
+  $("lockPw").value = "";
+  toast("🔓 Lock turned off — no password needed");
+  await refresh(false);
+});
+$("btnLockCancel").addEventListener("click", () => {
+  $("lockConfirm").classList.add("hidden");
+  $("optLock").checked = true;
+});
+$("lockPw").addEventListener("keydown", (e) => { if (e.key === "Enter") $("btnLockOff").click(); });
+
+// ---------------------------------------------------------------- smena hisoboti
+async function loadReport() {
+  const r = await api("/api/report");
+  $("reportText").textContent = r.text;
+  $("reportSince").textContent = `since ${clock(r.start)}`;
+}
+function closeReport() { $("reportModal").classList.add("hidden"); }
+guard($("btnReport"), async () => {
+  $("reportText").textContent = "Loading…";
+  $("reportModal").classList.remove("hidden");
+  await loadReport();
+});
+$("btnReportClose").addEventListener("click", closeReport);
+$("reportModal").addEventListener("click", (e) => { if (e.target === $("reportModal")) closeReport(); });
+addEventListener("keydown", (e) => { if (e.key === "Escape") closeReport(); });
+guard($("btnReportCopy"), async () => {
+  const text = $("reportText").textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch (e) {  // eski usul (clipboard ruxsati bo'lmasa)
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+  }
+  toast("✅ Copied — paste it in Telegram");
+});
+guard($("btnReportSend"), async () => { await api("/api/report/send", {}); toast("Demo: this sends the report to your Saved Messages"); });
+guard($("btnNewShift"), async () => {
+  if (!(await ask({ title: "Start a new shift?", icon: "undo", ok: "New shift",
+      text: "The report will count only what happens from this moment." }))) return;
+  await api("/api/shift/new", {});
+  await loadReport();
+  toast("New shift started");
+});
+
+// ---------------------------------------------------------------- dashboard ogohlantirishlari (shu brauzerda saqlanadi)
+// Accent rangi (faqat shu brauzerda): menyu, asosiy tugmalar, switch'lar. Holat ranglari (qizil/sariq...) o'zgarmaydi
+const ACCENTS = {
+  green:  { name: "Green",  a: "#22c55e", a2: "#16a34a", hover: "#2fd96b", fg: "#4ade80", text: "#06210f", rgb: "34, 197, 94" },
+  blue:   { name: "Blue",   a: "#3b82f6", a2: "#2563eb", hover: "#5b9bff", fg: "#60a5fa", text: "#ffffff", rgb: "59, 130, 246" },
+  teal:   { name: "Teal",   a: "#14b8a6", a2: "#0d9488", hover: "#2dd4bf", fg: "#2dd4bf", text: "#03201d", rgb: "20, 184, 166" },
+  violet: { name: "Violet", a: "#8b5cf6", a2: "#7c3aed", hover: "#a78bfa", fg: "#a78bfa", text: "#ffffff", rgb: "139, 92, 246" },
+  orange: { name: "Orange", a: "#f97316", a2: "#ea580c", hover: "#fb923c", fg: "#fb923c", text: "#1c0d02", rgb: "249, 115, 22" },
+  pink:   { name: "Pink",   a: "#ec4899", a2: "#db2777", hover: "#f472b6", fg: "#f472b6", text: "#ffffff", rgb: "236, 72, 153" },
+};
+function getAccent() { try { return localStorage.getItem("eld_accent") || "green"; } catch (e) { return "green"; } }
+function applyAccent(key) {
+  const c = ACCENTS[key] || ACCENTS.green, r = document.documentElement.style;
+  r.setProperty("--accent", c.a); r.setProperty("--accent-2", c.a2); r.setProperty("--accent-hover", c.hover);
+  r.setProperty("--accent-fg", c.fg); r.setProperty("--accent-text", c.text);
+  r.setProperty("--accent-soft", `rgba(${c.rgb}, .18)`); r.setProperty("--accent-border", `rgba(${c.rgb}, .35)`);
+}
+function renderAccentPick() {
+  const cur = getAccent();
+  $("accentPick").innerHTML = Object.entries(ACCENTS).map(([k, c]) =>
+    `<button type="button" class="accent-dot${k === cur ? " on" : ""}" data-accent="${k}" role="radio"
+      aria-checked="${k === cur}" title="${c.name}" style="--c:${c.a}"></button>`).join("");
+}
+applyAccent(getAccent());
+renderAccentPick();
+$("accentPick").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-accent]");
+  if (!b) return;
+  try { localStorage.setItem("eld_accent", b.dataset.accent); } catch (ex) { /* private oyna */ }
+  applyAccent(b.dataset.accent);
+  renderAccentPick();
+});
+
+const OPT_DEF = { notify: false, sound: true, undo: true };
+function opt(k) {
+  try { const v = localStorage.getItem("eld_opt_" + k); return v === null ? OPT_DEF[k] : v === "1"; }
+  catch (e) { return OPT_DEF[k]; }
+}
+function setOpt(k, v) { try { localStorage.setItem("eld_opt_" + k, v ? "1" : "0"); } catch (e) { /* private oyna */ } }
+
+let audioCtx = null;
+// Brauzer ovozni faqat foydalanuvchi biror narsani bosgandan keyin ruxsat beradi
+addEventListener("pointerdown", () => {
+  try { audioCtx = audioCtx || new AudioContext(); audioCtx.resume(); } catch (e) { /* ovozsiz */ }
+}, { passive: true });
+function beep() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  [[0, 660], [0.18, 880]].forEach(([d, f]) => {
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t + d);
+    g.gain.exponentialRampToValueAtTime(0.25, t + d + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.16);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t + d); o.stop(t + d + 0.17);
+  });
+}
+function alertNew(list) {
+  if (opt("sound")) beep();
+  if (!opt("notify") || !("Notification" in window) || Notification.permission !== "granted") return;
+  const lines = list.slice(0, 4).map((i) => `Unit# ${i.unit} ${i.name}: ${(KIND[i.type] || [i.type])[0]}`);
+  if (list.length > 4) lines.push(`+${list.length - 4} more`);
+  try {
+    const n = new Notification(`ELD Monitor — ${list.length} new issue${list.length > 1 ? "s" : ""}`,
+                               { body: lines.join("\n"), tag: "eld-new" });
+    n.onclick = () => { focus(); showTab("overview"); n.close(); };
+  } catch (e) { /* bildirishnoma ishlamadi */ }
+}
+function renderAlertOpts() {
+  $("optNotify").checked = opt("notify") && "Notification" in window && Notification.permission === "granted";
+  $("optSound").checked = opt("sound");
+  $("optUndo").checked = opt("undo");
+  $("notifyHint").textContent = !("Notification" in window) ? "This browser does not support notifications."
+    : Notification.permission === "denied" ? "Notifications are blocked for this site — allow them in the browser's site settings."
+    : "For new issues that go to Telegram";
+}
+$("optNotify").addEventListener("change", async (e) => {
+  if (e.target.checked && "Notification" in window && Notification.permission !== "granted") {
+    await Notification.requestPermission();
+  }
+  setOpt("notify", e.target.checked && Notification.permission === "granted");
+  renderAlertOpts();
+});
+$("optSound").addEventListener("change", (e) => { setOpt("sound", e.target.checked); if (e.target.checked) beep(); });
+$("optUndo").addEventListener("change", (e) => setOpt("undo", e.target.checked));
+$("btnTestAlert").addEventListener("click", () => {
+  alertNew([{ unit: "0000", name: "Test Driver", type: "offline" }]);
+  if (!opt("sound") && !opt("notify")) toast("Both alerts are off");
+});
+renderAlertOpts();
+
+// ---------------------------------------------------------------- yuborish (live rejimda 5 soniya "Undo")
+let pendingSend = null;
+async function doSend(keys) {
+  try {
+    const r = await api("/api/issue/send", { keys });
+    toast((RESULT[r.result] || [r.result])[0]);
+  } catch (ex) { if (ex.message !== "locked") toast("❌ " + ex.message); }
+  await refresh(false);
+}
+function clearPending() {
+  if (!pendingSend) return null;
+  const p = pendingSend;
+  clearInterval(p.timer);
+  pendingSend = null;
+  $("undoBar").classList.add("hidden");
+  return p;
+}
+function startSend(keys, unit) {
+  if (S.status.dry_run || !opt("undo")) return doSend(keys);
+  const prev = clearPending();  // oldingisi hali kutayotgan bo'lsa — darhol yuboriladi
+  if (prev) doSend(prev.keys);
+  let left = 5;
+  const show = () => { $("undoText").textContent = `Sending to Unit# ${unit} in ${left} s…`; };
+  pendingSend = { id: JSON.stringify(keys), keys, timer: setInterval(() => {
+    left -= 1;
+    if (left > 0) return show();
+    const p = clearPending();
+    if (p) doSend(p.keys);
+  }, 1000) };
+  show();
+  $("undoBar").classList.remove("hidden");
+  renderIssues();
+}
+$("btnUndo").addEventListener("click", () => { clearPending(); toast("Cancelled — nothing was sent"); S && renderIssues(); });
+
+["actionList", "infoList"].forEach((id) => $(id).addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-act]");
+  if (!b) return;
+  const keys = JSON.parse(b.dataset.keys);
+  if (b.dataset.act === "send") return startSend(keys, b.dataset.unit);
+  b.disabled = true;
+  try {
+    await api("/api/issue/ignore", { keys, hours: b.dataset.act === "ignore" ? 1 : 0 });
+    await refresh(false);
+  } catch (ex) { if (ex.message !== "locked") toast("❌ " + ex.message); }
+  b.disabled = false;
+}));
+
+// "Open log" / "Open chat" — kartochkalarda va trailer ro'yxatida
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-open]");
+  if (!b) return;
+  b.disabled = true;
+  // Log shu brauzerning o'zida (siz ishlayotgan Chrome) bitta "FiveELD" tabida ochiladi.
+  // Tab bosish paytida ochiladi — aks holda brauzer uni popup deb bloklaydi.
+  const isLog = b.dataset.open === "log";
+  const win = null;
+  try {
+    const r = await api(`/api/open/${b.dataset.open}`, { unit: b.dataset.unit, key: b.dataset.key || "",
+                                                          name: b.dataset.name || "", gkey: b.dataset.gkey || "",
+                                                          day: b.dataset.day || "" });
+    if (!isLog) toast("Demo: this opens the driver's Telegram group");
+    else if (win) { win.location.href = r.url; win.focus(); }
+    else toast("Demo: this opens the driver's log in FiveELD");
+  } catch (ex) {
+    // Faqat hozir ochilgan bo'sh tabni yopamiz (oldingi log ochiq turgan tabga tegmaymiz)
+    try { if (win && win.location.href === "about:blank") win.close(); } catch (e) { /* boshqa sayt — qoldiramiz */ }
+    if (ex.message !== "locked") toast("❌ " + ex.message);
+  }
+  b.disabled = false;
+});
+$("btnTrlOk").addEventListener("click", () => { showTrlOk = !showTrlOk; S && renderTrailers(); });
+
+["drvSearch", "drvCompany"].forEach((id) => $(id).addEventListener("input", () => S && renderDrivers()));
+$("violSearch").addEventListener("input", () => S && renderViolations());
+$("histSearch").addEventListener("input", () => S && renderHistory());
+// Filtr tugmalari (segment)
+function bindSeg(segId, attr, set, rerender) {
+  document.querySelectorAll(`#${segId} button`).forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll(`#${segId} button`).forEach((x) => x.classList.toggle("active", x === b));
+    set(b.dataset[attr]);
+    if (S) rerender();
+  }));
+}
+function selectSeg(segId, attr, value) {
+  document.querySelectorAll(`#${segId} button`).forEach((x) => x.classList.toggle("active", x.dataset[attr] === value));
+}
+bindSeg("drvSeg", "dfilter", (v) => { drvFilter = v; }, renderDrivers);
+bindSeg("violSeg", "vfilter", (v) => { violFilter = v; }, renderViolations);
+bindSeg("chgSeg", "cfilter", (v) => { chgFilter = v; }, renderChanges);
+bindSeg("histSeg", "hfilter", (v) => { histFilter = v; }, renderHistory);
+$("histBody").addEventListener("click", (e) => {
+  const t = e.target.closest("[data-hist]");
+  if (!t) return;
+  const id = t.dataset.hist;
+  histOpen.has(id) ? histOpen.delete(id) : histOpen.add(id);
+  renderHistory();
+});
+
+// ---------------------------------------------------------------- sozlamalar: bitta "Save changes"
+function collectSettings() {
+  const body = { low_time_minutes: {}, messages: {} };
+  document.querySelectorAll("[data-cfg]").forEach((el) => { body[el.dataset.cfg] = Number(el.value); });
+  document.querySelectorAll("[data-low]").forEach((el) => { body.low_time_minutes[el.dataset.low] = Number(el.value); });
+  document.querySelectorAll("[data-msg]").forEach((el) => { body.messages[el.dataset.msg] = el.value; });
+  body.send_kinds = [...document.querySelectorAll("[data-send]")].filter((el) => el.checked).map((el) => el.dataset.send);
+  body.notify_violations = $("notifyViol").checked;
+  body.auto_sleeper = $("autoSleeper").value;
+  body.auto_fill = $("autoFill").value;
+  const comps = [...document.querySelectorAll("[data-company]")];
+  if (comps.length) body.companies = comps.filter((el) => el.checked).map((el) => el.dataset.company);
+  return body;
+}
+let savedSnapshot = "";
+function updateDirty() {
+  const dirty = settingsLoaded && JSON.stringify(collectSettings()) !== savedSnapshot;
+  $("saveBar").classList.toggle("hidden", !dirty);
+  document.querySelectorAll(".alert-row").forEach((r) => {
+    r.classList.toggle("is-off", !r.querySelector("[data-send]").checked);
+  });
+  return dirty;
+}
+document.querySelector('[data-page="settings"]').addEventListener("input", (e) => {
+  if (e.target.matches("[data-msg]")) renderPreview(e.target.dataset.msg);
+  updateDirty();
+});
+guard($("btnSaveAll"), async () => {
+  const body = collectSettings();
+  for (const [k, v] of Object.entries(body.messages)) {
+    if (!v.trim()) throw new Error(`Message "${k}" is empty`);
+  }
+  await api("/api/settings", body);
+  toast("✅ Settings saved");
+  settingsLoaded = false;
+  await refresh(false);
+});
+$("btnDiscard").addEventListener("click", () => { loadSettings(S.config); toast("Changes discarded"); });
+addEventListener("beforeunload", (e) => { if (updateDirty()) { e.preventDefault(); e.returnValue = ""; } });
+
+// Bo'limlar menyusi
+// Settings: bir vaqtda bitta bo'lim (chap menyudan tanlanadi, shu brauzerda eslab qolinadi)
+function showSetSec(id) {
+  if (!$(id)) id = "secConn";
+  document.querySelectorAll(".set-sec").forEach((s) => s.classList.toggle("hidden", s.id !== id));
+  document.querySelectorAll("#setNav button").forEach((b) => b.classList.toggle("active", b.dataset.sec === id));
+  try { localStorage.setItem("eld_set_sec", id); } catch (e) { /* private oyna */ }
+}
+document.querySelectorAll("#setNav button").forEach((b) => b.addEventListener("click", () => { showSetSec(b.dataset.sec); scrollTo(0, 0); }));
+showSetSec((() => { try { return localStorage.getItem("eld_set_sec"); } catch (e) { return null; } })() || "secConn");
+guard($("btnPw"), async () => {
+  $("pwErr").textContent = "";
+  if ($("pwNew").value !== $("pwNew2").value) { $("pwErr").textContent = "New passwords do not match"; return; }
+  try {
+    await api("/api/password", { old: $("pwOld").value, new: $("pwNew").value });
+    ["pwOld", "pwNew", "pwNew2"].forEach((id) => { $(id).value = ""; });
+    toast("✅ Password changed");
+  } catch (e) { $("pwErr").textContent = e.message; }
+});
+
+async function tgStep(url, body, clearId) {
+  $("tgErr").textContent = "";
+  try {
+    const r = await api(url, body);
+    if (r.error) $("tgErr").textContent = r.error;
+    if (clearId) $(clearId).value = "";
+  } catch (e) { $("tgErr").textContent = e.message; }
+  await refresh(false);
+}
+guard($("btnTgKeys"), () => tgStep("/api/telegram/keys", { api_id: $("tgApiId").value, api_hash: $("tgApiHash").value }, "tgApiHash"));
+guard($("btnTgPhone"), () => tgStep("/api/telegram/phone", { phone: $("tgPhoneIn").value }));
+guard($("btnTgCode"), () => tgStep("/api/telegram/code", { code: $("tgCodeIn").value }, "tgCodeIn"));
+guard($("btnTgPass"), () => tgStep("/api/telegram/2fa", { password: $("tgPassIn").value }, "tgPassIn"));
+guard($("btnRescan"), async () => {
+  const r = await api("/api/telegram/rescan", {});
+  toast(`Reading the last ${r.hours} h of Unit# groups...`);
+  await refresh(false);
+});
+guard($("btnTgQr"), () => tgStep("/api/telegram/qr", {}));
+document.querySelectorAll("[data-tg-back]").forEach((b) =>
+  guard(b, () => tgStep("/api/telegram/reset", {})));
+guard($("btnTgSwitch"), async () => {
+  if (!(await ask({ title: "Switch Telegram account?", icon: "swap", ok: "Log out", danger: true,
+      text: "This computer is removed from the account's Devices list. Then log in again with a QR code " +
+            "or a phone number. Messages are not sent until you log in." }))) return;
+  await tgStep("/api/telegram/logout", {});
+  toast("Logged out of Telegram — connect the other account");
+});
+guard($("btnTgRefresh"), async () => { const r = await api("/api/telegram/refresh", {}); toast(`${r.groups} groups found`); await refresh(false); });
+
+// ---------------------------------------------------------------- avto-qulflash
+["mousemove", "keydown", "click", "scroll", "touchstart"].forEach((ev) =>
+  addEventListener(ev, () => { lastActivity = Date.now(); }, { passive: true }));
+setInterval(async () => {
+  const mins = S && S.config.lock_enabled !== false ? S.config.auto_lock_minutes : 0;
+  if (mins > 0 && Date.now() - lastActivity > mins * 60000) {
+    try { await api("/api/logout", {}); } catch (e) { /* baribir */ }
+    toast("Demo: the dashboard would lock here");
+  }
+}, 15000);
+// Foydalanuvchi faol bo'lsa, server sessiyasini ham yangilab turamiz
+setInterval(() => { if (Date.now() - lastActivity < 60000) refresh(false); }, 60000);
+
+refresh(false);
+setInterval(refresh, 5000);
+
+
+RESULT.demo = ["Demo — not sent", "t-gray"];
+
+</script>
+
+</body>
+</html>
